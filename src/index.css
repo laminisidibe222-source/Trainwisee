@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+  }
+
+  html {
+    /* clip, not hidden: hidden turns the element into a scroll container and breaks position:sticky */
+    overflow-x: clip;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #0f172a;
+    font-family: 'Inter', sans-serif;
+    overflow-x: clip;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Glassmorphism (light) */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.glass-card {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(101, 163, 13, 0.45);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(101, 163, 13, 0.1);
+  transform: translateY(-2px);
+}
+
+.neon-glow {
+  box-shadow: 0 10px 30px rgba(101, 163, 13, 0.28);
+}
+
+.neon-glow-cyan {
+  box-shadow: 0 10px 30px rgba(14, 116, 144, 0.24);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #0f172a 0%, #64748b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-lime {
+  background: linear-gradient(135deg, #65a30d 0%, #0e7490 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Soft aurora wash — a light surface needs a gentler tint than a dark one */
+.aurora-bg {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(
+    circle,
+    rgba(101, 163, 13, 0.16) 0%,
+    rgba(14, 116, 144, 0.1) 50%,
+    transparent 70%
+  );
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Brand wordmark ──────────────────────────────────────────── */
+.tw-logo {
+  display: inline-flex;
+  align-items: baseline;
+  font-family: 'Barlow Condensed', 'Arial Narrow', 'Arial Black', system-ui, sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  font-stretch: condensed;
+  letter-spacing: -0.012em;
+  line-height: 0.82;
+  text-transform: uppercase;
+  transform: skewX(-2deg);
+  transform-origin: left center;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.tw-logo__train { color: #0f172a; }
+.tw-logo__wise { color: #4d7c0f; }
+
+.tw-logo--light .tw-logo__train { color: #ffffff; }
+.tw-logo--light .tw-logo__wise { color: #a3e635; }
