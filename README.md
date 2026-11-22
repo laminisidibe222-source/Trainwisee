@@ -20,6 +20,7 @@ generated server-side and stored in Neon.
 npm install
 cp .env.example .env        # then paste your Neon connection string
 npm run db:push             # create users, sessions, profiles, blueprints, checkins, subscriptions
+npm run db:check            # verify the URL, list tables, row counts and indexes
 npm run dev                 # API on :8787, site on :3001 with /api proxied
 ```
 
@@ -53,6 +54,7 @@ Everything else in `.env.example` is a placeholder for features that are not bui
 | `npm start` | API only; also serves `dist/` when it exists |
 | `npm run typecheck` | web **and** server typecheck |
 | `npm run db:push` | apply `src/db/schema.ts` to Neon |
+| `npm run db:check` | read-only connection test: host, latency, tables, rows, indexes |
 | `npm run db:studio` | Drizzle Studio against the same database |
 
 ## API
