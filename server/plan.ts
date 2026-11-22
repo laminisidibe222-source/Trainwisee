@@ -245,16 +245,27 @@ export function generateBlueprint(p: OnboardingData): Blueprint {
         ? '2 × interval session plus 2 × 20 min zone-2.'
         : '2 × 20 min zone-2 for heart health, not fat loss.';
 
-  /* ---- roadmap ---- */
+  /* ---- roadmap ----
+   * Four fixed blocks over 12 weeks. `deloadEveryWeeks` is a recovery cadence,
+   * not a week number, so it must not be used to end a phase (that produced
+   * ranges like "7–6").
+   */
   const roadmap = [
     { weeks: '1–2', focus: 'Calibration', milestone: 'Baseline lifts and measurements logged' },
-    { weeks: '3–6', focus: 'Accumulation', milestone: `+${p.goal === 'lose_fat' ? '0' : '5–8'}% load on main lifts, adherence ≥ 85%` },
     {
-      weeks: `7–${deloadEveryWeeks}`,
+      weeks: '3–6',
+      focus: 'Accumulation',
+      milestone:
+        p.goal === 'lose_fat'
+          ? 'Hold main-lift loads, adherence ≥ 85%, steps at target'
+          : '+5–8% load on main lifts, adherence ≥ 85%',
+    },
+    {
+      weeks: '7–9',
       focus: 'Intensification',
       milestone: p.goal === 'lose_fat' ? '−1.5 to 2.5 kg body weight, lifts held' : '+2 to 3 kg lean mass',
     },
-    { weeks: `${deloadEveryWeeks + 1}–12`, focus: 'Deload + re-test', milestone: 'Re-run the assessment, regenerate the blueprint' },
+    { weeks: '10–12', focus: 'Deload + re-test', milestone: 'Deload week, then re-run the assessment and regenerate' },
   ];
 
   return {

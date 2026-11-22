@@ -3,7 +3,8 @@
  * in the database. Read-only: no DDL, no writes, no secrets printed.
  */
 import 'dotenv/config';
-import { neon } from '@neondatabase/serverless';
+// Same client the API uses, so this check exercises the same retry behaviour.
+import { sql } from '../src/db/index.js';
 
 const EXPECTED = ['users', 'sessions', 'profiles', 'blueprints', 'checkins', 'subscriptions'];
 
@@ -27,8 +28,6 @@ function safeHost(raw: string): string {
 const host = safeHost(url);
 console.log(`host        ${host}${host.includes('-pooler') ? '   (pooled)' : '   (direct)'}`);
 console.log(`sslmode     ${/sslmode=/.test(url) ? (url.match(/sslmode=([a-z]+)/)?.[1] ?? 'set') : 'driver default (require)'}`);
-
-const sql = neon(url);
 
 try {
   const t0 = Date.now();

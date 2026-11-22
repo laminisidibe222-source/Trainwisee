@@ -360,7 +360,15 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ ok: false, error: 'Unexpected server error.' });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`TrainWise API  http://localhost:${PORT}`);
   console.log(`Neon           ${process.env.DATABASE_URL ? 'DATABASE_URL loaded' : 'DATABASE_URL missing'}`);
+});
+
+server.on('error', (err: NodeJS.ErrnoException) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already taken. Stop the other process or set API_PORT=8790.`);
+    process.exit(1);
+  }
+  throw err;
 });
