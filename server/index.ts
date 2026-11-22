@@ -202,14 +202,6 @@ app.post('/api/blueprint', async (req, res) => {
   try {
     const plan = generateBlueprint(p);
 
-    // Keep one profile row per user: update the latest, else insert.
-    const [existingProfile] = await db
-      .select({ id: profiles.id })
-      .from(profiles)
-      .where(eq(profiles.userId, user.id))
-      .orderBy(desc(profiles.updatedAt))
-      .limit(1);
-
     const profileValues = {
       age: p.age,
       sex: p.sex,
@@ -228,11 +220,12 @@ app.post('/api/blueprint', async (req, res) => {
       updatedAt: new Date(),
     };
 
-    if (existingProfile) {
-      await db.update(profiles).set(profileValues).where(eq(profiles.id, existingProfile.id));
-    } else {
-      await db.insert(profiles).values({ userId: user.id, ...profileValues });
-    }
+    // One profile per user. The unique key on user_id makes this a single atomic
+    // statement, so two requests at once can no longer create two rows.
+    await db
+      .insert(profiles)
+      .values({ userId: user.id, ...profileValues })
+      .onConflictDoUpdate({ target: profiles.userId, set: profileValues });
 
     const [saved] = await db
       .insert(blueprints)

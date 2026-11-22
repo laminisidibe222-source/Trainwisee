@@ -26,6 +26,10 @@ npm run dev                 # API on :8787, site on :3001 with /api proxied
 `DATABASE_URL` comes from Neon → your project → **Connect** → the `postgresql://…`
 URI. Use the **pooled** host (it ends in `-pooler`).
 
+`db:push` is the fast path for a fresh database. The initial DDL is also committed in
+`drizzle/` (tables, unique keys, indexes), so a deployed environment can use
+`npm run db:migrate` instead of guessing.
+
 If `db:push` offers to truncate tables, stop: that means the schema changed in a
 destructive way. Review the generated SQL with `npm run db:generate` instead.
 

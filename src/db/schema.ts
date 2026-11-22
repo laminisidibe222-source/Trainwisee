@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, jsonb, integer, boolean, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, jsonb, integer, doublePrecision, index } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -21,11 +21,15 @@ export const sessions = pgTable('sessions', {
   userAgent: text('user_agent'),
   expiresAt: timestamp('expires_at').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (t) => [index('sessions_user_idx').on(t.userId)]);
 
 export const profiles = pgTable('profiles', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull(),
+  // one profile per account: this unique key is what the blueprint upsert targets
+  userId: integer('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull()
+    .unique(),
   age: integer('age'),
   sex: text('sex'),
   heightCm: doublePrecision('height_cm'),
@@ -53,7 +57,7 @@ export const blueprints = pgTable('blueprints', {
   roadmap: jsonb('roadmap').notNull(),
   modelVersion: text('model_version'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (t) => [index('blueprints_user_created_idx').on(t.userId, t.createdAt)]);
 
 export const checkins = pgTable('checkins', {
   id: serial('id').primaryKey(),
@@ -63,7 +67,7 @@ export const checkins = pgTable('checkins', {
   energy: integer('energy'),
   adherence: integer('adherence'),
   notes: text('notes'),
-});
+}, (t) => [index('checkins_user_date_idx').on(t.userId, t.date)]);
 
 export const subscriptions = pgTable('subscriptions', {
   id: serial('id').primaryKey(),
