@@ -16,6 +16,7 @@ export const LandingPage = ({
   onSignup,
   onLogout,
   onOpenPlans,
+  onHome,
 }: {
   onGetBlueprint: () => void;
   user: User | null;
@@ -23,6 +24,7 @@ export const LandingPage = ({
   onSignup: () => void;
   onLogout: () => void;
   onOpenPlans: () => void;
+  onHome: () => void;
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const { t } = useI18n();
@@ -63,7 +65,13 @@ export const LandingPage = ({
 
       {/* 1. Navbar */}
       <nav className="sticky top-0 z-50 glass-panel border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-        <Logo size={26} />
+        <button
+          onClick={() => (user ? onHome() : window.scrollTo({ top: 0, behavior: 'smooth' }))}
+          className="flex items-center shrink-0 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+          aria-label={user ? t('nav.dashboard') : 'TrainWise — top of page'}
+        >
+          <Logo size={26} />
+        </button>
         <div className="hidden md:flex items-center gap-8 text-sm text-slate-700 font-medium">
           {navLinks.map((l) => (
             <a key={l.href} href={l.href} className="hover:text-lime-700 transition-colors">

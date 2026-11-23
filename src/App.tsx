@@ -89,6 +89,11 @@ function App() {
 
   /** Signed-in home: the dashboard. */
   const openDashboard = () => setView({ name: 'dashboard' });
+  /**
+   * Where the logo goes. A signed-in user must never be dropped back on the
+   * marketing page — the account's own home is the dashboard.
+   */
+  const openHome = () => setView(user ? { name: 'dashboard' } : { name: 'landing' });
 
   /** The plan library, one click away from the dashboard. */
   const openPlans = () => setView({ name: 'plans' });
@@ -146,6 +151,7 @@ function App() {
           onSignup={() => openAuth('signup', 'landing')}
           onLogout={handleLogout}
           onOpenPlans={openDashboard}
+          onHome={openHome}
         />
       )}
 
@@ -170,7 +176,7 @@ function App() {
           onOpenPlanId={openPlanById}
           onNew={() => setView({ name: 'wizard' })}
           onOpenPlans={openPlans}
-          onHome={() => setView({ name: 'landing' })}
+          onHome={openHome}
           onLogout={handleLogout}
         />
       )}
@@ -180,7 +186,7 @@ function App() {
           user={user}
           onOpen={openSavedPlan}
           onNew={() => setView({ name: 'wizard' })}
-          onHome={() => setView({ name: 'landing' })}
+          onHome={openHome}
           onDashboard={openDashboard}
           onLogout={handleLogout}
         />
@@ -189,7 +195,7 @@ function App() {
       {view.name === 'wizard' && (
         <OnboardingWizard
           onComplete={handleComplete}
-          onCancel={() => setView({ name: 'landing' })}
+          onCancel={() => (user ? setView({ name: 'dashboard' }) : setView({ name: 'landing' }))}
         />
       )}
 
@@ -205,7 +211,7 @@ function App() {
           plan={view.plan}
           id={view.id}
           user={user}
-          onRestart={() => setView({ name: 'landing' })}
+          onRestart={() => setView(user ? { name: 'wizard' } : { name: 'landing' })}
           onLogout={handleLogout}
           onOpenPlans={openPlans}
         />

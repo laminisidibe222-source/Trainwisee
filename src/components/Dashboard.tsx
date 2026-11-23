@@ -143,7 +143,7 @@ export const Dashboard = ({
     >
       <nav className="sticky top-0 z-50 glass-panel border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-5 min-w-0 shrink-0">
-          <button onClick={onHome} className="flex items-center shrink-0" aria-label="TrainWise home">
+          <button onClick={onHome} className="flex items-center shrink-0" aria-label="TrainWise dashboard">
             <Logo size={22} />
           </button>
           <div className="hidden md:flex items-center gap-1 text-sm font-semibold">
