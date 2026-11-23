@@ -40,7 +40,8 @@ export const profiles = pgTable('profiles', {
   experience: text('experience'),
   equipment: jsonb('equipment'),
   injuries: jsonb('injuries'),
-  sleepHours: integer('sleep_hours'),
+  // Half hours are normal (7.5 h), so this must not be an integer column.
+  sleepHours: doublePrecision('sleep_hours'),
   dietPreference: text('diet_preference'),
   allergies: jsonb('allergies'),
   budget: text('budget'),
@@ -49,7 +50,9 @@ export const profiles = pgTable('profiles', {
 
 export const blueprints = pgTable('blueprints', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull(),
+  userId: integer('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
   profileSnapshot: jsonb('profile_snapshot').notNull(),
   trainingPlan: jsonb('training_plan').notNull(),
   nutritionPlan: jsonb('nutrition_plan').notNull(),
@@ -61,7 +64,9 @@ export const blueprints = pgTable('blueprints', {
 
 export const checkins = pgTable('checkins', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull(),
+  userId: integer('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
   date: timestamp('date').defaultNow().notNull(),
   weightKg: doublePrecision('weight_kg'),
   energy: integer('energy'),
@@ -71,7 +76,9 @@ export const checkins = pgTable('checkins', {
 
 export const subscriptions = pgTable('subscriptions', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull(),
+  userId: integer('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
   plan: text('plan').notNull(),
   status: text('status').notNull(),
   stripeCustomerId: text('stripe_customer_id'),

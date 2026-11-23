@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" ALTER COLUMN "sleep_hours" SET DATA TYPE double precision;
