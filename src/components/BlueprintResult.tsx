@@ -31,12 +31,14 @@ export const BlueprintResult = ({
   onRestart,
   user,
   onLogout,
+  onOpenPlans,
 }: {
   plan: Plan;
   id: number;
   onRestart: () => void;
   user?: User | null;
   onLogout?: () => void;
+  onOpenPlans?: () => void;
 }) => {
   const { nutritionPlan: n, trainingPlan: t, recoveryPlan: r, roadmap } = plan;
 
@@ -72,6 +74,14 @@ export const BlueprintResult = ({
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-100 transition-all"
               >
                 <LogOut size={14} /> Log out
+              </button>
+            )}
+            {onOpenPlans && (
+              <button
+                onClick={onOpenPlans}
+                className="px-5 py-2.5 rounded-full bg-[#B6FF3C] text-black text-sm font-semibold hover:shadow-[0_8px_24px_rgba(101,163,13,0.35)] transition-all"
+              >
+                My plans
               </button>
             )}
             <button

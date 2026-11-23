@@ -14,12 +14,14 @@ export const LandingPage = ({
   onLogin,
   onSignup,
   onLogout,
+  onOpenPlans,
 }: {
   onGetBlueprint: () => void;
   user: User | null;
   onLogin: () => void;
   onSignup: () => void;
   onLogout: () => void;
+  onOpenPlans: () => void;
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
@@ -41,10 +43,13 @@ export const LandingPage = ({
         <div className="hidden md:flex items-center gap-3">
           {user ? (
             <>
-              <span className="flex items-center gap-2 px-3 py-2 rounded-full bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 max-w-[190px]">
+              <button
+                onClick={onOpenPlans}
+                className="flex items-center gap-2 px-3 py-2 rounded-full bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 max-w-[190px] hover:border-lime-500/60 hover:bg-slate-50 transition-all"
+              >
                 <Avatar label={user.name || user.email} size={20} />
                 <span className="truncate">{user.name || user.email}</span>
-              </span>
+              </button>
               <button
                 onClick={onLogout}
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-100 transition-all"
@@ -94,12 +99,20 @@ export const LandingPage = ({
           <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-slate-700">Pricing</a>
           <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="text-slate-700">FAQ</a>
           {user ? (
-            <button
-              onClick={() => { setMobileMenuOpen(false); onLogout(); }}
-              className="w-full py-3 rounded-full border border-slate-200 text-slate-700 font-semibold text-sm inline-flex items-center justify-center gap-2 mt-2"
-            >
-              <LogOut size={14} /> Log out ({user.name || user.email})
-            </button>
+            <>
+              <button
+                onClick={() => { setMobileMenuOpen(false); onOpenPlans(); }}
+                className="w-full py-3 rounded-full bg-slate-100 border border-slate-200 text-slate-900 font-semibold text-sm inline-flex items-center justify-center gap-2 mt-2"
+              >
+                <Avatar label={user.name || user.email} size={18} /> My plans
+              </button>
+              <button
+                onClick={() => { setMobileMenuOpen(false); onLogout(); }}
+                className="w-full py-3 rounded-full border border-slate-200 text-slate-700 font-semibold text-sm inline-flex items-center justify-center gap-2"
+              >
+                <LogOut size={14} /> Log out
+              </button>
+            </>
           ) : (
             <div className="grid grid-cols-2 gap-3 mt-2">
               <button

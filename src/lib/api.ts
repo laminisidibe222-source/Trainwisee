@@ -1,5 +1,5 @@
 import type { OnboardingData } from '../types/onboarding';
-import type { Overview, BlueprintResponse } from '../types/blueprint';
+import type { Overview, BlueprintResponse, Plan } from '../types/blueprint';
 
 /**
  * Thin client for the TrainWise API. The browser never sees DATABASE_URL —
@@ -88,6 +88,22 @@ export type BlueprintSummary = {
   modelVersion: string | null;
   goal: string | null;
 };
+
+/** A saved blueprint, shaped like the POST /api/blueprint response. */
+export type SavedBlueprint = { id: number; createdAt: string; modelVersion: string | null; plan: Plan };
+
+export async function getBlueprint(id: number): Promise<SavedBlueprint> {
+  const res = await request<{
+    ok: true;
+    blueprint: Plan & { id: number; createdAt: string; modelVersion: string | null };
+  }>(`/blueprint/${id}`);
+  return {
+    id: res.blueprint.id,
+    createdAt: res.blueprint.createdAt,
+    modelVersion: res.blueprint.modelVersion,
+    plan: res.blueprint,
+  };
+}
 
 export async function listBlueprints(): Promise<BlueprintSummary[]> {
   const res = await request<{ ok: true; blueprints: BlueprintSummary[] }>('/blueprints');

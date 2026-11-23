@@ -3,17 +3,19 @@ import { LandingPage } from './sections/LandingPage';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { BlueprintResult } from './components/BlueprintResult';
 import { AuthPage } from './components/AuthPage';
+import { PlansPage } from './components/PlansPage';
 import { Toaster, toast } from 'react-hot-toast';
-import { createBlueprint, getMe, logout as apiLogout, ApiError, type User } from './lib/api';
+import { createBlueprint, getMe, logout as apiLogout, ApiError, type SavedBlueprint, type User } from './lib/api';
 import type { OnboardingData } from './types/onboarding';
 import type { Plan } from './types/blueprint';
 
 type View =
   | { name: 'landing' }
   | { name: 'auth'; then: 'wizard' | 'landing' }
+  | { name: 'plans' }
   | { name: 'wizard' }
   | { name: 'generating' }
-  | { name: 'result'; plan: Plan; id: number };
+  | { name: 'result'; plan: Plan; id: number; fromPlans?: boolean };
 
 const toastStyle = {
   style: { background: '#FFFFFF', color: '#0F172A', border: '1px solid rgba(101, 163, 13, 0.35)' },
@@ -67,6 +69,12 @@ function App() {
     }
   };
 
+  /** Any signed-in destination: the plan library. */
+  const openPlans = () => setView({ name: 'plans' });
+
+  const openSavedPlan = (saved: SavedBlueprint) =>
+    setView({ name: 'result', plan: saved.plan, id: saved.id, fromPlans: true });
+
   const handleLogout = async () => {
     try {
       await apiLogout();
@@ -96,6 +104,7 @@ function App() {
           onLogin={() => openAuth('login', 'landing')}
           onSignup={() => openAuth('signup', 'landing')}
           onLogout={handleLogout}
+          onOpenPlans={openPlans}
         />
       )}
 
@@ -105,8 +114,21 @@ function App() {
           onBack={() => setView({ name: 'landing' })}
           onSuccess={(u) => {
             setUser(u);
-            setView(view.then === 'wizard' ? { name: 'wizard' } : { name: 'landing' });
+            // Signing in has to land somewhere. A blueprint in progress wins;
+            // otherwise the account's own page, not the marketing page.
+            setView(view.then === 'wizard' ? { name: 'wizard' } : { name: 'plans' });
+            toast.success(`Signed in as ${u.name || u.email}`, toastStyle);
           }}
+        />
+      )}
+
+      {view.name === 'plans' && user && (
+        <PlansPage
+          user={user}
+          onOpen={openSavedPlan}
+          onNew={() => setView({ name: 'wizard' })}
+          onHome={() => setView({ name: 'landing' })}
+          onLogout={handleLogout}
         />
       )}
 
@@ -131,6 +153,7 @@ function App() {
           user={user}
           onRestart={() => setView({ name: 'landing' })}
           onLogout={handleLogout}
+          onOpenPlans={openPlans}
         />
       )}
     </>
