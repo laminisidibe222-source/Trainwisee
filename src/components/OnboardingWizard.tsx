@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { OnboardingData } from '../types/onboarding';
+import { INJURY_AREAS, OnboardingData, type InjuryArea } from '../types/onboarding';
 import { ArrowRight, ArrowLeft, Check, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Logo } from './Logo';
@@ -171,6 +171,47 @@ export const OnboardingWizard = ({
                       </div>
                     );
                   })}
+                </div>
+
+                <div className="space-y-3 pt-2">
+                  <div>
+                    <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">
+                      {t('wizard.injuries.q')}
+                    </label>
+                    <p className="text-[11px] text-slate-500 mt-1">{t('wizard.injuries.optional')}</p>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {INJURY_AREAS.map((area: InjuryArea) => {
+                      const selected = (formData.injuries || []).includes(area);
+                      return (
+                        <div
+                          key={area}
+                          role="checkbox"
+                          aria-checked={selected}
+                          tabIndex={0}
+                          onClick={() => {
+                            const current = formData.injuries || [];
+                            const updated = selected ? current.filter((x) => x !== area) : [...current, area];
+                            updateField('injuries', updated);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key !== 'Enter' && e.key !== ' ') return;
+                            e.preventDefault();
+                            const current = formData.injuries || [];
+                            const updated = selected ? current.filter((x) => x !== area) : [...current, area];
+                            updateField('injuries', updated);
+                          }}
+                          className={`p-3 rounded-xl border text-center cursor-pointer text-sm font-semibold transition-all ${
+                            selected
+                              ? 'border-amber-400 bg-amber-50 text-amber-900'
+                              : 'border-slate-200 text-slate-700 hover:border-amber-300 hover:bg-amber-50/40'
+                          }`}
+                        >
+                          {t(`wizard.inj.${area}` as TKey)}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </motion.div>

@@ -53,6 +53,7 @@ Everything else in `.env.example` is a placeholder for features that are not bui
 | `npm run build` | typecheck + production bundle in `dist/` |
 | `npm start` | API only; also serves `dist/` when it exists |
 | `npm run typecheck` | web **and** server typecheck |
+| `npm test` | plan-engine unit tests (`node:test`, no database needed) |
 | `npm run db:push` | apply `src/db/schema.ts` to Neon |
 | `npm run db:check` | read-only connection test: host, latency, tables, rows, indexes |
 | `npm run db:studio` | Drizzle Studio against the same database |
@@ -71,6 +72,18 @@ Everything else in `.env.example` is a placeholder for features that are not bui
 | `GET /api/blueprint/:id` | yes | one blueprint (404 if it is not yours) |
 | `GET /api/health` | — | liveness + `select 1` against Neon |
 | `GET /api/overview` | — | public counters and goal mix |
+
+## Joint adaptations
+
+The wizard lets you flag knees, hips, lower back, shoulders, wrists/elbows or neck.
+`server/plan.ts` keeps a substitution table per joint: the movement pattern stays
+(squat, hinge, press, pull) while the loading or range changes — a flagged knee
+turns `Back squat` into `Box squat to parallel`, a flagged lower back turns
+`Conventional deadlift` into `Trap-bar deadlift`, and so on. Every swap is
+returned in `trainingPlan.substitutions` as `{ from, to, injury }`, so the plan
+view can show exactly what changed and why. `npm test` asserts that a clean
+profile gets the untouched split, that injuries never leave a day below three
+exercises, and that overlapping injuries record each swap once.
 
 ## Security notes
 

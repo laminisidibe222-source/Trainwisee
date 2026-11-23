@@ -5,7 +5,7 @@
  * which makes the output testable and keeps the door open for swapping in an
  * LLM later (the shape is what the client renders, not the method).
  */
-import type { OnboardingData } from '../src/types/onboarding.js';
+import type { InjuryArea, OnboardingData } from '../src/types/onboarding.js';
 import type { Plan as Blueprint } from '../src/types/blueprint.js';
 
 type Day = Blueprint['trainingPlan']['days'][number];
@@ -35,6 +35,66 @@ const GOAL_LABEL: Record<OnboardingData['goal'], string> = {
 };
 
 const round = (n: number, step = 10) => Math.round(n / step) * step;
+
+/**
+ * Exercise swaps per flagged joint. These are deliberately conservative: the
+ * pattern stays the same (squat, hinge, press, pull) and only the loading or
+ * range changes, so the plan still progresses — it just stops aggravating the
+ * joint the user told us about.
+ */
+const SUBSTITUTIONS: Record<InjuryArea, Record<string, string>> = {
+  knee: {
+    'Back squat': 'Box squat to parallel',
+    'Front squat': 'Goblet squat to box',
+    'Pause squat': 'Tempo box squat',
+    'Split squat': 'Step-up to low box',
+    'Leg extension': 'Spanish squat (band)',
+    'Leg press': 'Leg press, reduced range',
+    'Hanging leg raise': 'Hanging knee raise',
+    'Ab wheel': 'Dead bug',
+  },
+  lower_back: {
+    'Conventional deadlift': 'Trap-bar deadlift',
+    Deadlift: 'Trap-bar deadlift',
+    'Romanian deadlift': 'Hip thrust',
+    'Barbell row': 'Chest-supported row',
+    'Back squat': 'Belt squat or leg press',
+    'Pause squat': 'Leg press',
+    'Ab wheel': 'Dead bug',
+    'Hanging leg raise': 'Reverse crunch',
+  },
+  shoulder: {
+    'Bench press': 'Neutral-grip dumbbell press',
+    'Incline dumbbell press': 'Low-incline dumbbell press',
+    'Overhead press': 'Landmine press',
+    'Weighted pull-up': 'Lat pulldown',
+    'Lateral raise': 'Lateral raise, 90° max',
+    'Rear delt fly': 'Face pull',
+    'Cable fly': 'Low-to-high cable fly',
+  },
+  wrist_elbow: {
+    'Push-up': 'Fist push-up',
+    'Barbell row': 'Chest-supported row, neutral grip',
+    'Bench press': 'Neutral-grip dumbbell press',
+    'Incline curl': 'Hammer curl',
+    'Dumbbell curl': 'Hammer curl',
+    'Rope pushdown': 'Rope pushdown, neutral wrists',
+    'Overhead press': 'Neutral-grip press',
+  },
+  hip: {
+    'Back squat': 'Box squat',
+    'Front squat': 'Goblet squat',
+    'Pause squat': 'Box squat',
+    'Split squat': 'Step-up',
+    Deadlift: 'Sumo deadlift',
+    'Conventional deadlift': 'Sumo deadlift',
+  },
+  neck: {
+    'Neck / grip': 'Farmer carry',
+    'Overhead press': 'Landmine press',
+    'Weighted pull-up': 'Lat pulldown',
+  },
+};
 
 const BODYWEIGHT_DAY: Day = {
   day: 'Bodyweight',
@@ -216,12 +276,28 @@ export function generateBlueprint(p: OnboardingData): Blueprint {
   const bodyweightOnly = heavyGear === 0;
   const needsDumbbellSwap = !has('barbell') && !has('rack') && has('dumbbell');
 
-  const days = bodyweightOnly
-    ? [BODYWEIGHT_DAY, BODYWEIGHT_DAY, BODYWEIGHT_DAY]
-    : base.days.map((d) => ({
-        ...d,
-        focus: p.injuries?.length ? `${d.focus} · modified` : d.focus,
-      }));
+  const injuries = [...new Set(p.injuries ?? [])];
+  const swaps: { from: string; to: string; injury: string }[] = [];
+  const swap = (day: Day): Day => ({
+    ...day,
+    exercises: day.exercises.map((exercise) => {
+      for (const injury of injuries) {
+        const replacement = SUBSTITUTIONS[injury][exercise.name];
+        if (replacement) {
+          swaps.push({ from: exercise.name, to: replacement, injury });
+          return { ...exercise, name: replacement };
+        }
+      }
+      return exercise;
+    }),
+  });
+
+  const baseDays = bodyweightOnly ? [BODYWEIGHT_DAY, BODYWEIGHT_DAY, BODYWEIGHT_DAY] : base.days;
+  const days = baseDays.map(swap);
+  // One row per swap, in the order the user will read the plan.
+  const substitutions = swaps.filter(
+    (s, i) => swaps.findIndex((o) => o.from === s.from && o.to === s.to) === i
+  );
 
   const split =
     (bodyweightOnly ? 'Bodyweight full body × 3' : base.name) +
@@ -269,7 +345,7 @@ export function generateBlueprint(p: OnboardingData): Blueprint {
   ];
 
   return {
-    trainingPlan: { split, frequency: days.length, days, progression },
+    trainingPlan: { split, frequency: days.length, days, progression, substitutions },
     nutritionPlan: {
       bmr: Math.round(bmr),
       tdee: Math.round(tdee),
@@ -286,7 +362,7 @@ export function generateBlueprint(p: OnboardingData): Blueprint {
       readinessCheck: 'Morning resting HR and grip strength — if both drop for 3 days, take a deload.',
     },
     roadmap,
-    modelVersion: 'trainwise-rules-v0',
+    modelVersion: 'trainwise-rules-v1',
   };
 }
 

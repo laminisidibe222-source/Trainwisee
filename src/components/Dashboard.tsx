@@ -10,6 +10,7 @@ import {
   Plus,
   RefreshCw,
   Sparkles,
+  ShieldAlert,
   Timer,
   TrendingUp,
   Utensils,
@@ -367,6 +368,18 @@ export const Dashboard = ({
                   </p>
                   <p className="mt-1 text-xs text-slate-600 leading-relaxed">{plan.roadmap[0]?.milestone}</p>
                 </div>
+                {!!plan.trainingPlan.substitutions?.length && (
+                  <p className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50/60 px-3 py-2 text-[11px] text-amber-900">
+                    <ShieldAlert size={13} className="mt-0.5 shrink-0" />
+                    <span>
+                      <span className="font-semibold">{t('dash.adaptedTitle')}</span> ·{' '}
+                      {t(
+                        plan.trainingPlan.substitutions.length === 1 ? 'dash.adaptedOne' : 'dash.adaptedMany',
+                        { n: plan.trainingPlan.substitutions.length }
+                      )}
+                    </span>
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-2">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700">
                     <MoonStar size={13} className="text-lime-700" /> {t('dash.sleep', { n: plan.recoveryPlan.sleepTarget })}

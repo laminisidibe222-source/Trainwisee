@@ -2,7 +2,7 @@
   "name": "trainwise",
   "version": "1.0.0",
   "private": true,
-  "description": "TrainWise — AI-powered fitness & nutrition co-pilot. Generate a personalized Body Blueprint in seconds.",
+  "description": "TrainWise \u2014 AI-powered fitness & nutrition co-pilot. Generate a personalized Body Blueprint in seconds.",
   "type": "module",
   "scripts": {
     "dev": "concurrently -n api,web -c green,cyan \"npm:dev:api\" \"npm:dev:web\"",
@@ -16,7 +16,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json",
-    "db:check": "tsx server/check-db.ts"
+    "db:check": "tsx server/check-db.ts",
+    "test": "tsx --test server/plan.test.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",

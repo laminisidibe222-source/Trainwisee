@@ -10,6 +10,8 @@ export type Plan = {
     frequency: number;
     days: TrainingDay[];
     progression: string;
+    /** Exercises swapped because of a flagged joint. Empty when none apply. */
+    substitutions?: { from: string; to: string; injury: string }[];
   };
   nutritionPlan: {
     bmr: number;

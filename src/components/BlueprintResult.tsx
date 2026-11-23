@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Dumbbell, Moon, Map, Database, LogOut } from 'lucide-react';
+import { Flame, Dumbbell, Moon, Map, Database, LogOut, ShieldAlert } from 'lucide-react';
 import type { Plan } from '../types/blueprint';
 import type { User } from '../lib/api';
 import { Avatar } from './Logo';
-import { LanguageToggle, useI18n } from '../i18n';
+import { LanguageToggle, useI18n, type TKey } from '../i18n';
 
 const Cell = ({
   icon,
@@ -144,6 +144,28 @@ export const BlueprintResult = ({
           </div>
           <p className="text-xs text-slate-500">{tp.progression}</p>
         </section>
+
+        {/* injury adaptations */}
+        {!!tp.substitutions?.length && (
+          <section className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5 space-y-3">
+            <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-amber-900">
+              <ShieldAlert size={15} /> {t('result.adapted')}
+            </h2>
+            <p className="text-xs text-amber-900/80">{t('result.adaptedSub')}</p>
+            <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
+              {tp.substitutions.map((sub) => (
+                <li key={`${sub.from}-${sub.to}`} className="text-sm">
+                  <span className="text-slate-500 line-through">{sub.from}</span>
+                  <span className="mx-1.5 text-amber-700">→</span>
+                  <span className="font-semibold text-slate-900">{sub.to}</span>
+                  <span className="block text-[11px] text-slate-600 mt-0.5">
+                    {t(`injury.reason.${sub.injury}` as TKey)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* recovery + roadmap */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
