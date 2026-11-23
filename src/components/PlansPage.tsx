@@ -23,12 +23,14 @@ export const PlansPage = ({
   onOpen,
   onNew,
   onHome,
+  onDashboard,
   onLogout,
 }: {
   user: User;
   onOpen: (plan: SavedBlueprint) => void;
   onNew: () => void;
   onHome: () => void;
+  onDashboard: () => void;
   onLogout: () => void;
 }) => {
   const [items, setItems] = useState<BlueprintSummary[] | null>(null);
@@ -63,9 +65,20 @@ export const PlansPage = ({
       className="min-h-screen bg-white text-slate-900 overflow-x-clip"
     >
       <nav className="sticky top-0 z-50 glass-panel border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
-        <button onClick={onHome} className="flex items-center shrink-0" aria-label="TrainWise home">
-          <Logo size={22} />
-        </button>
+        <div className="flex items-center gap-5 min-w-0">
+          <button onClick={onHome} className="flex items-center shrink-0" aria-label="TrainWise home">
+            <Logo size={22} />
+          </button>
+          <div className="hidden md:flex items-center gap-1 text-sm font-semibold">
+            <button
+              onClick={onDashboard}
+              className="px-3 py-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+            >
+              Dashboard
+            </button>
+            <span className="px-3 py-2 rounded-full bg-lime-50 text-lime-800 border border-lime-200">My plans</span>
+          </div>
+        </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <span className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-full bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 max-w-[220px]">
             <Avatar label={user.name || user.email} size={20} />

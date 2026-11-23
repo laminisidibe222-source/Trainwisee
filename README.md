@@ -67,6 +67,7 @@ Everything else in `.env.example` is a placeholder for features that are not bui
 | `GET /api/auth/me` | — | current user, or `null` |
 | `POST /api/blueprint` | yes | validate profile, generate plan, upsert profile, insert blueprint |
 | `GET /api/blueprints` | yes | your last 20 blueprints |
+| `GET /api/dashboard` | yes | signed-in home: totals, latest plan, recent plans |
 | `GET /api/blueprint/:id` | yes | one blueprint (404 if it is not yours) |
 | `GET /api/health` | — | liveness + `select 1` against Neon |
 | `GET /api/overview` | — | public counters and goal mix |

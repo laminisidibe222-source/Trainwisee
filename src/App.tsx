@@ -4,14 +4,24 @@ import { OnboardingWizard } from './components/OnboardingWizard';
 import { BlueprintResult } from './components/BlueprintResult';
 import { AuthPage } from './components/AuthPage';
 import { PlansPage } from './components/PlansPage';
+import { Dashboard } from './components/Dashboard';
 import { Toaster, toast } from 'react-hot-toast';
-import { createBlueprint, getMe, logout as apiLogout, ApiError, type SavedBlueprint, type User } from './lib/api';
+import {
+  createBlueprint,
+  getBlueprint,
+  getMe,
+  logout as apiLogout,
+  ApiError,
+  type SavedBlueprint,
+  type User,
+} from './lib/api';
 import type { OnboardingData } from './types/onboarding';
 import type { Plan } from './types/blueprint';
 
 type View =
   | { name: 'landing' }
   | { name: 'auth'; then: 'wizard' | 'landing' }
+  | { name: 'dashboard' }
   | { name: 'plans' }
   | { name: 'wizard' }
   | { name: 'generating' }
@@ -26,12 +36,18 @@ function App() {
   const [booting, setBooting] = useState(true);
   const [view, setView] = useState<View>({ name: 'landing' });
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [openingPlan, setOpeningPlan] = useState(false);
 
   // Restore the session from the httpOnly cookie on first paint.
   useEffect(() => {
     let alive = true;
     getMe()
-      .then((res) => alive && setUser(res.user))
+      .then((res) => {
+        if (!alive) return;
+        setUser(res.user);
+        // A returning session should open on the dashboard, not the sales page.
+        if (res.user) setView({ name: 'dashboard' });
+      })
       .catch(() => undefined)
       .finally(() => alive && setBooting(false));
     return () => {
@@ -69,8 +85,25 @@ function App() {
     }
   };
 
-  /** Any signed-in destination: the plan library. */
+  /** Signed-in home: the dashboard. */
+  const openDashboard = () => setView({ name: 'dashboard' });
+
+  /** The plan library, one click away from the dashboard. */
   const openPlans = () => setView({ name: 'plans' });
+
+  /** Older plans are summaries on the dashboard, so they load on demand. */
+  const openPlanById = async (id: number) => {
+    setOpeningPlan(true);
+    try {
+      const saved = await getBlueprint(id);
+      setView({ name: 'result', plan: saved.plan, id: saved.id, fromPlans: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Could not open that plan.';
+      toast.error(message, { style: { ...toastStyle.style, border: '1px solid rgba(220, 38, 38, 0.35)' } });
+    } finally {
+      setOpeningPlan(false);
+    }
+  };
 
   const openSavedPlan = (saved: SavedBlueprint) =>
     setView({ name: 'result', plan: saved.plan, id: saved.id, fromPlans: true });
@@ -97,6 +130,12 @@ function App() {
   return (
     <>
       <Toaster position="bottom-right" />
+      {openingPlan && (
+        <div className="fixed inset-0 z-[60] bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
+          <div className="w-9 h-9 rounded-full border-2 border-lime-600/25 border-t-lime-600 animate-spin" />
+          <p className="text-sm text-slate-600">Opening your blueprint…</p>
+        </div>
+      )}
       {view.name === 'landing' && (
         <LandingPage
           onGetBlueprint={handleGetBlueprint}
@@ -104,7 +143,7 @@ function App() {
           onLogin={() => openAuth('login', 'landing')}
           onSignup={() => openAuth('signup', 'landing')}
           onLogout={handleLogout}
-          onOpenPlans={openPlans}
+          onOpenPlans={openDashboard}
         />
       )}
 
@@ -116,9 +155,21 @@ function App() {
             setUser(u);
             // Signing in has to land somewhere. A blueprint in progress wins;
             // otherwise the account's own page, not the marketing page.
-            setView(view.then === 'wizard' ? { name: 'wizard' } : { name: 'plans' });
+            setView(view.then === 'wizard' ? { name: 'wizard' } : { name: 'dashboard' });
             toast.success(`Signed in as ${u.name || u.email}`, toastStyle);
           }}
+        />
+      )}
+
+      {view.name === 'dashboard' && user && (
+        <Dashboard
+          user={user}
+          onOpenPlan={openSavedPlan}
+          onOpenPlanId={openPlanById}
+          onNew={() => setView({ name: 'wizard' })}
+          onOpenPlans={openPlans}
+          onHome={() => setView({ name: 'landing' })}
+          onLogout={handleLogout}
         />
       )}
 
@@ -128,6 +179,7 @@ function App() {
           onOpen={openSavedPlan}
           onNew={() => setView({ name: 'wizard' })}
           onHome={() => setView({ name: 'landing' })}
+          onDashboard={openDashboard}
           onLogout={handleLogout}
         />
       )}

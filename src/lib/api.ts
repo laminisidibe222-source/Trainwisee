@@ -111,3 +111,27 @@ export async function listBlueprints(): Promise<BlueprintSummary[]> {
 }
 
 export { ApiError };
+
+/* ---------------- dashboard ---------------- */
+
+export type DashboardCheckin = { date: string; weightKg: number | null; energy: number | null };
+
+export type DashboardData = {
+  ok: true;
+  user: User;
+  totals: { plans: number; checkins: number };
+  checkin: DashboardCheckin | null;
+  latest: {
+    id: number;
+    createdAt: string;
+    modelVersion: string | null;
+    profile: { goal?: string } | null;
+    plan: Plan;
+  } | null;
+  recent: BlueprintSummary[];
+};
+
+/** One request for the whole signed-in home. */
+export async function getDashboard(): Promise<DashboardData> {
+  return request<DashboardData>('/dashboard');
+}

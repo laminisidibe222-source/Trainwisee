@@ -8,6 +8,7 @@
  *   POST /api/blueprint      (auth) validate profile → store profile + plan → return plan
  *   GET  /api/blueprint/:id  (auth) fetch one of your blueprints
  *   GET  /api/blueprints     (auth) list your blueprints
+ *   GET  /api/dashboard      (auth) signed-in home: totals, latest plan, recent
  *   GET  /api/overview       public counters
  *   GET  /api/health         liveness + Neon reachability
  *
@@ -23,7 +24,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { db, sql as neon } from '../src/db/index.js';
-import { users, profiles, blueprints, sessions } from '../src/db/schema.js';
+import { users, profiles, blueprints, sessions, checkins } from '../src/db/schema.js';
 import { generateBlueprint } from './plan.js';
 import { onboardingSchema } from '../src/types/onboarding.js';
 import {
@@ -247,8 +248,7 @@ app.post('/api/blueprint', async (req, res) => {
   }
 });
 
-app.get('/api/blueprints', async (req, res) => {
-  const user = requireUser(req, res);
+app.get('/api/blueprints', async (req, res) => {  const user = requireUser(req, res);
   if (!user) return;
 
   try {
@@ -279,8 +279,71 @@ app.get('/api/blueprints', async (req, res) => {
   }
 });
 
-app.get('/api/blueprint/:id', async (req, res) => {
+/**
+ * Everything the dashboard needs, in one round trip. The signed-in home used to
+ * fire three separate requests (user, list, plan), which on a cold serverless
+ * instance means three cold starts.
+ */
+app.get('/api/dashboard', async (req, res) => {
   const user = requireUser(req, res);
+  if (!user) return;
+
+  try {
+    const [recent, planTotals, checkinTotals, lastCheckin] = await Promise.all([
+      db
+        .select()
+        .from(blueprints)
+        .where(eq(blueprints.userId, user.id))
+        .orderBy(desc(blueprints.createdAt))
+        .limit(4),
+      db.select({ n: count() }).from(blueprints).where(eq(blueprints.userId, user.id)),
+      db.select({ n: count() }).from(checkins).where(eq(checkins.userId, user.id)),
+      db
+        .select({ date: checkins.date, weightKg: checkins.weightKg, energy: checkins.energy })
+        .from(checkins)
+        .where(eq(checkins.userId, user.id))
+        .orderBy(desc(checkins.date))
+        .limit(1),
+    ]);
+
+    const [latestRow] = recent;
+
+    res.json({
+      ok: true,
+      user: publicUser(user),
+      totals: { plans: planTotals[0]?.n ?? 0, checkins: checkinTotals[0]?.n ?? 0 },
+      checkin: lastCheckin[0] ?? null,
+      // The newest plan ships in full so "open my plan" does not need a second
+      // request; the rest are summaries because the list is only navigation.
+      latest: latestRow
+        ? {
+            id: latestRow.id,
+            createdAt: latestRow.createdAt,
+            modelVersion: latestRow.modelVersion,
+            profile: latestRow.profileSnapshot,
+            plan: {
+              trainingPlan: latestRow.trainingPlan,
+              nutritionPlan: latestRow.nutritionPlan,
+              recoveryPlan: latestRow.recoveryPlan,
+              roadmap: latestRow.roadmap,
+              modelVersion: latestRow.modelVersion,
+            },
+          }
+        : null,
+      recent: recent.slice(1).map((r) => ({
+        id: r.id,
+        createdAt: r.createdAt,
+        modelVersion: r.modelVersion,
+        goal: (r.profileSnapshot as { goal?: string } | null)?.goal ?? null,
+      })),
+    });
+  } catch (err) {
+    console.error('[dashboard]', err);
+    res.status(503).json({ ok: false, error: 'database unavailable' });
+  }
+});
+
+app.get('/api/blueprint/:id', async (req, res) => {  const user = requireUser(req, res);
   if (!user) return;
 
   const id = Number(req.params.id);
