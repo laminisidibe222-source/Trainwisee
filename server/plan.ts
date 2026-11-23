@@ -5,8 +5,8 @@
  * which makes the output testable and keeps the door open for swapping in an
  * LLM later (the shape is what the client renders, not the method).
  */
-import type { OnboardingData } from '../src/types/onboarding';
-import type { Plan as Blueprint } from '../src/types/blueprint';
+import type { OnboardingData } from '../src/types/onboarding.js';
+import type { Plan as Blueprint } from '../src/types/blueprint.js';
 
 type Day = Blueprint['trainingPlan']['days'][number];
 

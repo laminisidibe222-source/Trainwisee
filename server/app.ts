@@ -22,10 +22,10 @@ import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { db, sql as neon } from '../src/db/index';
-import { users, profiles, blueprints, sessions } from '../src/db/schema';
-import { generateBlueprint } from './plan';
-import { onboardingSchema } from '../src/types/onboarding';
+import { db, sql as neon } from '../src/db/index.js';
+import { users, profiles, blueprints, sessions } from '../src/db/schema.js';
+import { generateBlueprint } from './plan.js';
+import { onboardingSchema } from '../src/types/onboarding.js';
 import {
   SESSION_COOKIE,
   hashPassword,
@@ -41,8 +41,8 @@ import {
   passwordProblem,
   attachUser,
   requireUser,
-} from './auth';
-import type { AuthedRequest } from './auth';
+} from './auth.js';
+import type { AuthedRequest } from './auth.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
