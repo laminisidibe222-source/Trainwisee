@@ -9,6 +9,9 @@
       "destination": "/api"
     }
   ],
+  "regions": [
+    "cle1"
+  ],
   "functions": {
     "api/index.ts": {
       "maxDuration": 30
