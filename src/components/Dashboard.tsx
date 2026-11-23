@@ -231,9 +231,7 @@ export const Dashboard = ({
                 <WeekDial week={weeksIn} label={t('dash.weekLabel', { n: weeksIn })} caption={t('dash.of12')} />
                 <div className="hidden sm:block text-xs text-slate-600 space-y-1">
                   <p className="font-semibold text-slate-900">{goalLabel}</p>
-                  <p>
-                    {plan.trainingPlan.frequency} × {plan.trainingPlan.split}
-                  </p>
+                  <p>{plan.trainingPlan.split}</p>
                   <p className="text-lime-800 font-semibold">
                     {plan.nutritionPlan.kcal} kcal · {plan.nutritionPlan.proteinG} g P
                   </p>
