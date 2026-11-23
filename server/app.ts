@@ -305,9 +305,18 @@ app.get('/api/blueprint/:id', async (req, res) => {
 /* ---------------- public routes ---------------- */
 
 app.get('/api/health', async (_req, res) => {
+  const started = performance.now();
   try {
     await neon`select 1`;
-    res.json({ ok: true, db: 'up', ts: new Date().toISOString() });
+    // dbMs separates "the database is far away" from "this instance just cold
+    // started" when someone is staring at a slow page.
+    res.json({
+      ok: true,
+      db: 'up',
+      dbMs: Math.round(performance.now() - started),
+      region: process.env.VERCEL_REGION ?? 'local',
+      ts: new Date().toISOString(),
+    });
   } catch (err) {
     // Log the detail, never ship it: it contains the Neon host.
     console.error('[health]', err);
