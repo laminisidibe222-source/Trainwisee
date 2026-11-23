@@ -17,6 +17,7 @@ import {
 } from './lib/api';
 import type { OnboardingData } from './types/onboarding';
 import type { Plan } from './types/blueprint';
+import { useI18n } from './i18n';
 
 type View =
   | { name: 'landing' }
@@ -37,6 +38,7 @@ function App() {
   const [view, setView] = useState<View>({ name: 'landing' });
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [openingPlan, setOpeningPlan] = useState(false);
+  const { t, tError } = useI18n();
 
   // Restore the session from the httpOnly cookie on first paint.
   useEffect(() => {
@@ -71,15 +73,15 @@ function App() {
     try {
       const { blueprint, id } = await createBlueprint(profile);
       setView({ name: 'result', plan: blueprint, id });
-      toast.success('Blueprint saved to your account.', toastStyle);
+      toast.success(t('err.saved'), toastStyle);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         setUser(null);
-        toast.error('Your session expired — sign in again.', toastStyle);
+        toast.error(t('err.session'), toastStyle);
         openAuth('login', 'wizard');
         return;
       }
-      const message = err instanceof Error ? err.message : 'Could not generate your blueprint.';
+      const message = err instanceof Error ? tError(err.message) : t('err.plan');
       toast.error(message, { style: { ...toastStyle.style, border: '1px solid rgba(220, 38, 38, 0.35)' } });
       setView({ name: 'wizard' });
     }
@@ -98,7 +100,7 @@ function App() {
       const saved = await getBlueprint(id);
       setView({ name: 'result', plan: saved.plan, id: saved.id, fromPlans: true });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Could not open that plan.';
+      const message = err instanceof Error ? tError(err.message) : t('err.openPlan');
       toast.error(message, { style: { ...toastStyle.style, border: '1px solid rgba(220, 38, 38, 0.35)' } });
     } finally {
       setOpeningPlan(false);
@@ -116,7 +118,7 @@ function App() {
     }
     setUser(null);
     setView({ name: 'landing' });
-    toast.success('Signed out.', toastStyle);
+    toast.success(t('err.loggedOut'), toastStyle);
   };
 
   if (booting) {
@@ -156,7 +158,7 @@ function App() {
             // Signing in has to land somewhere. A blueprint in progress wins;
             // otherwise the account's own page, not the marketing page.
             setView(view.then === 'wizard' ? { name: 'wizard' } : { name: 'dashboard' });
-            toast.success(`Signed in as ${u.name || u.email}`, toastStyle);
+            toast.success(t('auth.signedIn', { name: u.name || u.email }), toastStyle);
           }}
         />
       )}
@@ -194,7 +196,7 @@ function App() {
       {view.name === 'generating' && (
         <div className="min-h-screen bg-white text-slate-900 flex flex-col items-center justify-center gap-4 overflow-x-clip">
           <div className="w-10 h-10 rounded-full border-2 border-lime-600/25 border-t-lime-600 animate-spin" />
-          <p className="text-sm text-slate-600">Computing your blueprint and saving it to Neon…</p>
+          <p className="text-sm text-slate-600">{t('app.generating')}</p>
         </div>
       )}
 

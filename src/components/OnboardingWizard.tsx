@@ -4,6 +4,7 @@ import { OnboardingData } from '../types/onboarding';
 import { ArrowRight, ArrowLeft, Check, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Logo } from './Logo';
+import { LanguageToggle, useI18n, type TKey } from '../i18n';
 
 export const OnboardingWizard = ({
   onComplete,
@@ -13,6 +14,7 @@ export const OnboardingWizard = ({
   onCancel?: () => void;
 }) => {
   const [step, setStep] = useState(1);
+  const { t } = useI18n();
   const [formData, setFormData] = useState<Partial<OnboardingData>>({
     age: 28,
     sex: 'male',
@@ -55,16 +57,19 @@ export const OnboardingWizard = ({
         <div className="flex items-center justify-between border-b border-slate-200 pb-6">
           <div className="flex items-center gap-3">
             <Logo size={21} />
-            <span className="font-bold text-slate-900 text-lg">Body Blueprint Setup</span>
+            <span className="font-bold text-slate-900 text-lg">{t('wizard.title')}</span>
           </div>
-          <span className="text-xs text-lime-700 font-semibold uppercase tracking-wider">Step {step} of 4</span>
+          <span className="text-xs text-lime-700 font-semibold uppercase tracking-wider">
+            {t('wizard.step', { n: step })}
+          </span>
+          <LanguageToggle className="mr-3" />
           {onCancel && (
             <button
               onClick={onCancel}
               aria-label="Cancel and return to the site"
               className="text-slate-500 hover:text-slate-900 transition-colors text-xs font-semibold uppercase tracking-wider"
             >
-              Cancel
+              {t('wizard.cancel')}
             </button>
           )}
         </div>
@@ -73,10 +78,10 @@ export const OnboardingWizard = ({
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-              <h2 className="text-2xl font-bold">Physical Biometrics</h2>
+              <h2 className="text-2xl font-bold">{t('wizard.s1.title')}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">Age</label>
+                  <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">{t('wizard.age')}</label>
                   <input
                     type="number"
                     value={formData.age}
@@ -85,19 +90,19 @@ export const OnboardingWizard = ({
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">Sex</label>
+                  <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">{t('wizard.sex')}</label>
                   <select
                     value={formData.sex}
                     onChange={e => updateField('sex', e.target.value)}
                     className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-lime-500 outline-none transition-colors"
                   >
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
+                    <option value="male">{t('wizard.sex.male')}</option>
+                    <option value="female">{t('wizard.sex.female')}</option>
+                    <option value="other">{t('wizard.sex.other')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">Height (cm)</label>
+                  <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">{t('wizard.height')}</label>
                   <input
                     type="number"
                     value={formData.heightCm}
@@ -106,7 +111,7 @@ export const OnboardingWizard = ({
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">Weight (kg)</label>
+                  <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">{t('wizard.weight')}</label>
                   <input
                     type="number"
                     value={formData.weightKg}
@@ -120,15 +125,15 @@ export const OnboardingWizard = ({
 
           {step === 2 && (
             <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-              <h2 className="text-2xl font-bold">Primary Goal & Experience</h2>
+              <h2 className="text-2xl font-bold">{t('wizard.s2.title')}</h2>
               <div className="space-y-4">
-                <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">What is your main objective?</label>
+                <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">{t('wizard.goal.q')}</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
-                    { id: 'build_muscle', title: 'Hypertrophy / Muscle', desc: 'Maximize clean muscle mass & strength' },
-                    { id: 'lose_fat', title: 'Fat Loss / Recomp', desc: 'Strip body fat while preserving lean tissue' },
-                    { id: 'recomp', title: 'Body Recomposition', desc: 'Build muscle and burn fat simultaneously' },
-                    { id: 'athletic_performance', title: 'Athletic Performance', desc: 'Explosive power, speed & stamina' }
+                    { id: 'build_muscle', title: t('wizard.goal.build_muscle'), desc: t('wizard.goal.build_muscle.desc') },
+                    { id: 'lose_fat', title: t('wizard.goal.lose_fat'), desc: t('wizard.goal.lose_fat.desc') },
+                    { id: 'recomp', title: t('wizard.goal.recomp'), desc: t('wizard.goal.recomp.desc') },
+                    { id: 'athletic_performance', title: t('wizard.goal.athletic_performance'), desc: t('wizard.goal.athletic_performance.desc') }
                   ].map(g => (
                     <div
                       key={g.id}
@@ -146,9 +151,9 @@ export const OnboardingWizard = ({
 
           {step === 3 && (
             <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-              <h2 className="text-2xl font-bold">Equipment & Environment</h2>
+              <h2 className="text-2xl font-bold">{t('wizard.s3.title')}</h2>
               <div className="space-y-4">
-                <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">Available Equipment</label>
+                <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">{t('wizard.equipment.q')}</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {['barbell', 'dumbbell', 'rack', 'cables', 'machines', 'bodyweight'].map(eq => {
                     const selected = formData.equipment?.includes(eq);
@@ -162,7 +167,7 @@ export const OnboardingWizard = ({
                         }}
                         className={`glass-card p-3 rounded-xl border text-center cursor-pointer capitalize text-sm font-semibold transition-all ${selected ? 'border-lime-500 bg-[#B6FF3C]/10 text-lime-700' : 'border-slate-200 text-slate-700'}`}
                       >
-                        {eq}
+                        {t(`wizard.eq.${eq}` as TKey)}
                       </div>
                     );
                   })}
@@ -173,24 +178,24 @@ export const OnboardingWizard = ({
 
           {step === 4 && (
             <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-              <h2 className="text-2xl font-bold">Nutrition & Recovery</h2>
+              <h2 className="text-2xl font-bold">{t('wizard.s4.title')}</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">Dietary Preference</label>
+                  <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">{t('wizard.diet')}</label>
                   <select
                     value={formData.dietPreference}
                     onChange={e => updateField('dietPreference', e.target.value)}
                     className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-lime-500 outline-none transition-colors"
                   >
-                    <option value="standard">Standard / Omnivore</option>
-                    <option value="vegetarian">Vegetarian</option>
-                    <option value="vegan">Vegan</option>
-                    <option value="keto">Ketogenic</option>
-                    <option value="paleo">Paleo</option>
+                    <option value="standard">{t('wizard.diet.standard')}</option>
+                    <option value="vegetarian">{t('wizard.diet.vegetarian')}</option>
+                    <option value="vegan">{t('wizard.diet.vegan')}</option>
+                    <option value="keto">{t('wizard.diet.keto')}</option>
+                    <option value="paleo">{t('wizard.diet.paleo')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">Average Sleep (Hours / Night)</label>
+                  <label className="text-xs text-slate-600 font-semibold uppercase tracking-wider">{t('wizard.sleep')}</label>
                   <input
                     type="number"
                     value={formData.sleepHours}
@@ -210,14 +215,14 @@ export const OnboardingWizard = ({
               onClick={handlePrev}
               className="px-6 py-2.5 rounded-full glass-panel border border-slate-200 text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-all flex items-center gap-2"
             >
-              <ArrowLeft size={16} /> Back
+              <ArrowLeft size={16} /> {t('wizard.back')}
             </button>
           ) : <div />}
           <button
             onClick={handleNext}
             className="px-8 py-3 rounded-full bg-[#B6FF3C] text-black font-bold text-sm hover:shadow-[0_8px_24px_rgba(101,163,13,0.35)] transition-all flex items-center gap-2"
           >
-            {step === 4 ? 'Generate Body Blueprint' : 'Continue'} <ArrowRight size={16} />
+            {step === 4 ? t('wizard.generate') : t('wizard.continue')} <ArrowRight size={16} />
           </button>
         </div>
       </div>
