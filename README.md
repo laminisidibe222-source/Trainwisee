@@ -85,8 +85,22 @@ Everything else in `.env.example` is a placeholder for features that are not bui
 
 ## Deploying
 
-Run `npm run build`, then `npm start` behind HTTPS. The API serves `dist/` itself, so
-one process is enough. Set `NODE_ENV=production` so the session cookie is marked
-`Secure`, and set `DATABASE_URL` in the host's environment — never in the repo.
+### Vercel (frontend + API in one project)
 
-See [`OVERVIEW.md`](./OVERVIEW.md) for the product reasoning and the data model.
+`api/[...path].ts` exports the same Express app as a Vercel Node function, so every
+`/api/*` call is handled by the real backend — no separate API host and no CORS.
+
+1. Import the repository into Vercel. `vercel.json` already sets the build command
+   (`npm run build`), the output directory (`dist`) and a 30 s function timeout.
+2. In **Project → Settings → Environment Variables**, add `DATABASE_URL` (the pooled
+   Neon string) for Production, Preview and Development. Without it the functions
+   start and then fail with a clear message.
+3. Deploy. `/api/health` should answer `{"ok":true,"db":"up"}`.
+
+Cookies are `Secure` automatically because Vercel sets `NODE_ENV=production`.
+`express` trusts exactly one proxy hop there, so rate limiting sees the real client IP.
+
+### Any Node host (Render, Railway, Fly)
+
+`npm run build` then `npm start` — the API serves `dist/` itself, one process, no
+proxy. Set `NODE_ENV=production` and `DATABASE_URL` in the host's environment.

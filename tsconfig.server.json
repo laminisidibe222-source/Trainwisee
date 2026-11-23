@@ -1,8 +1,12 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "lib": ["ESNext"],
-    "types": ["node"],
+    "lib": [
+      "ESNext"
+    ],
+    "types": [
+      "node"
+    ],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
@@ -12,5 +16,11 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": ["server/**/*.ts", "src/db/**/*.ts", "src/types/**/*.ts", "drizzle.config.ts"]
+  "include": [
+    "server/**/*.ts",
+    "api/**/*.ts",
+    "src/db/**/*.ts",
+    "src/types/**/*.ts",
+    "drizzle.config.ts"
+  ]
 }
