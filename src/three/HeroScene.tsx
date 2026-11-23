@@ -1,19 +1,65 @@
-import React, { useRef, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Float } from '@react-three/drei';
+import React, { useEffect, useRef, useState } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
-const TorsoHologram = () => {
-  const mesh = useRef<THREE.Mesh>(null!);
-  useFrame((_state, delta) => {
-    mesh.current.rotation.y += delta * 0.2;
+const TorsoHologram = () => (
+  <mesh>
+    <torusKnotGeometry args={[1, 0.3, 100, 32]} />
+    {/* deeper cyan so the wireframe still reads on a white page */}
+    <meshStandardMaterial color="#0E7490" emissive="#0E7490" emissiveIntensity={0.25} wireframe />
+  </mesh>
+);
+
+/**
+ * Auto-spin, drag to look around, and a slow float — the three things the hero
+ * actually needed. Written by hand (about 30 lines) instead of pulling in the
+ * whole @react-three/drei helper library for an orbit control we disable zoom
+ * and pan on anyway.
+ */
+const Spinner = () => {
+  const group = useRef<THREE.Group>(null!);
+  const drag = useRef({ active: false, x: 0, momentum: 0 });
+  const { gl } = useThree();
+
+  useEffect(() => {
+    const el = gl.domElement;
+    const down = (e: PointerEvent) => {
+      drag.current.active = true;
+      drag.current.x = e.clientX;
+    };
+    const move = (e: PointerEvent) => {
+      if (!drag.current.active) return;
+      const dx = e.clientX - drag.current.x;
+      drag.current.x = e.clientX;
+      group.current.rotation.y += dx * 0.01;
+      drag.current.momentum = dx * 0.3;
+    };
+    const up = () => {
+      drag.current.active = false;
+    };
+
+    el.addEventListener('pointerdown', down);
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    return () => {
+      el.removeEventListener('pointerdown', down);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+  }, [gl]);
+
+  useFrame((state, delta) => {
+    if (!drag.current.active) {
+      group.current.rotation.y += delta * 0.25 + drag.current.momentum * delta;
+      drag.current.momentum *= 0.92;
+    }
+    group.current.position.y = Math.sin(state.clock.elapsedTime * 1.4) * 0.05;
   });
+
   return (
-    <mesh ref={mesh}>
-      <torusKnotGeometry args={[1, 0.3, 100, 32]} />
-      {/* deeper cyan so the wireframe still reads on a white page */}
-      <meshStandardMaterial color="#0E7490" emissive="#0E7490" emissiveIntensity={0.25} wireframe />
-    </mesh>
+    <group ref={group}>
+      <TorsoHologram />
+    </group>
   );
 };
 
@@ -73,6 +119,7 @@ export const HeroScene = () => {
       // High-DPI phones allocate huge framebuffers; 1.75 is the point where the
       // extra pixels stop being visible but still cost GPU memory.
       dpr={[1, 1.75]}
+      camera={{ position: [0, 0, 5] }}
       gl={{ alpha: true, antialias: true, powerPreference: 'default' }}
       fallback={<Fallback reason="unsupported" onRetry={() => undefined} />}
       onCreated={({ gl }) => {
@@ -87,13 +134,9 @@ export const HeroScene = () => {
         );
       }}
     >
-      <PerspectiveCamera makeDefault position={[0, 0, 5]} />
-      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
       <ambientLight intensity={0.9} />
       <directionalLight position={[10, 10, 5]} intensity={1.2} />
-      <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-        <TorsoHologram />
-      </Float>
+      <Spinner />
     </Canvas>
   );
 };
