@@ -854,6 +854,9 @@ const PLAN_FR: Record<string, string> = {
   '2 × 20 min zone-2 for heart health, not fat loss.':
     '2 × 20 min en zone 2 pour le cœur, pas pour perdre du gras.',
   '3 × 30 min zone-2 plus 8k steps daily.': '3 × 30 min en zone 2 + 8 000 pas par jour.',
+  'Full body × 3': 'Corps entier × 3',
+  'Upper / lower × 4': 'Haut / bas × 4',
+  'Push / pull / legs × 5': 'Poussé / tiré / jambes × 5',
   Breakfast: 'Petit-déjeuner',
   Lunch: 'Déjeuner',
   Dinner: 'Dîner',

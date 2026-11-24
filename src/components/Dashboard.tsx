@@ -147,7 +147,7 @@ export const Dashboard = ({
         search={<PlanSearch plan={plan} onOpen={openLatest} />}
         planSummary={
           plan
-            ? { split: plan.trainingPlan.split, goal: goalLabel, kcal: plan.nutritionPlan.kcal, week: weeksIn }
+            ? { split: planText(lang, plan.trainingPlan.split), goal: goalLabel, kcal: plan.nutritionPlan.kcal, week: weeksIn }
             : null
         }
       >
@@ -284,8 +284,8 @@ export const Dashboard = ({
                   title={t('perf.title')}
                   sub={t('perf.sub', { n: days.length })}
                   right={
-                    <span className="shrink-0 rounded-full border border-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600">
-                      {plan.trainingPlan.split}
+                    <span className="shrink-0 rounded-full border border-slate-200 px-2.5 py-1 text-[10.5px] font-bold text-slate-600 sm:px-3 sm:py-1.5 sm:text-[11px]">
+                      {planText(lang, plan.trainingPlan.split)}
                     </span>
                   }
                 />
@@ -340,7 +340,7 @@ export const Dashboard = ({
               <Card>
                 <CardHead
                   title={t('split.title')}
-                  sub={plan.trainingPlan.split}
+                  sub={planText(lang, plan.trainingPlan.split)}
                   right={
                     <button
                       onClick={openLatest}
@@ -438,7 +438,7 @@ export const Dashboard = ({
                 <div className="mt-3 rounded-2xl border border-slate-200 p-3">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('dash.blockNow')}</p>
                   <p className="mt-1 text-[13px] font-bold text-slate-900">
-                    {plan.roadmap[0]?.focus ?? plan.trainingPlan.split}
+                    {planText(lang, plan.roadmap[0]?.focus ?? plan.trainingPlan.split)}
                   </p>
                   <p className="mt-0.5 text-[11px] leading-snug text-slate-500">
                     {planText(lang, plan.roadmap[0]?.milestone ?? '')}

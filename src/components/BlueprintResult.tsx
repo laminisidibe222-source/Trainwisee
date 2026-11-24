@@ -80,7 +80,7 @@ export const BlueprintResult = ({
               {t('result.title1')} <span className="text-lime-700">{t('result.title2')}</span>
             </h1>
             <p className="mt-3 text-slate-600 max-w-xl">
-              {t('result.meta', { split: tp.split, n: tp.frequency, version: plan.modelVersion })}
+              {t('result.meta', { split: planText(lang, tp.split), n: tp.frequency, version: plan.modelVersion })}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
