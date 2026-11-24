@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Dumbbell, Moon, Map, Database, LogOut, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Flame, Dumbbell, Moon, Map, Database, ShieldAlert } from 'lucide-react';
 import type { Plan } from '../types/blueprint';
 import type { User } from '../lib/api';
-import { Avatar } from './Logo';
-import { LanguageToggle, useI18n, type TKey } from '../i18n';
+import { useI18n, type TKey } from '../i18n';
+import { Shell } from './dash/Shell';
 
 const Cell = ({
   icon,
@@ -29,32 +29,52 @@ const Cell = ({
 export const BlueprintResult = ({
   plan,
   id,
-  onRestart,
   user,
+  onRestart,
+  onBack,
+  onDashboard,
+  onPlans,
   onLogout,
-  onOpenPlans,
 }: {
   plan: Plan;
   id: number;
+  user: User;
   onRestart: () => void;
-  user?: User | null;
-  onLogout?: () => void;
-  onOpenPlans?: () => void;
+  onBack: () => void;
+  onDashboard: () => void;
+  onPlans: () => void;
+  onLogout: () => void;
 }) => {
   const { nutritionPlan: n, trainingPlan: tp, recoveryPlan: r, roadmap } = plan;
   const { t } = useI18n();
 
   return (
-    <motion.main
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="min-h-screen bg-white text-slate-900 px-6 py-16 overflow-x-clip"
-    >
-      <div className="max-w-5xl mx-auto space-y-10">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <Shell
+        user={user}
+        active="plans"
+        onLogout={onLogout}
+        onNavigate={(a) => (a === 'dashboard' ? onDashboard() : a === 'plans' ? onPlans() : onRestart())}
+        title={
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onBack}
+              aria-label={t('result.back')}
+              className="grid h-8 w-8 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:text-slate-900"
+            >
+              <ArrowLeft size={15} />
+            </button>
+            <h1 className="text-lg font-bold tracking-tight text-slate-900">
+              {t('plans.card.title', { id })}
+            </h1>
+          </div>
+        }
+      >
+        <div className="space-y-8">
         <header className="flex flex-wrap items-end justify-between gap-6 border-b border-slate-200 pb-8">
           <div>
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-700">
-              <Database size={14} /> {t('result.saved', { n: id })}
+              <Database size={14} /> {t('result.saved')}
             </p>
             <h1 className="mt-3 text-4xl sm:text-5xl font-bold tracking-tight">
               {t('result.title1')} <span className="text-lime-700">{t('result.title2')}</span>
@@ -63,33 +83,10 @@ export const BlueprintResult = ({
               {t('result.meta', { split: tp.split, n: tp.frequency, version: plan.modelVersion })}
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <LanguageToggle className="mr-1" />
-            {user && (
-              <span className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-full bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 max-w-[220px]">
-                <Avatar label={user.name || user.email} size={20} />
-                <span className="truncate">{user.name || user.email}</span>
-              </span>
-            )}
-            {onLogout && (
-              <button
-                onClick={onLogout}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-100 transition-all"
-              >
-                <LogOut size={14} /> {t('nav.logout')}
-              </button>
-            )}
-            {onOpenPlans && (
-              <button
-                onClick={onOpenPlans}
-                className="px-5 py-2.5 rounded-full bg-[#B6FF3C] text-black text-sm font-semibold hover:shadow-[0_8px_24px_rgba(101,163,13,0.35)] transition-all"
-              >
-                {t('result.myPlans')}
-              </button>
-            )}
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={onRestart}
-              className="px-6 py-2.5 rounded-full border border-slate-300 bg-white text-sm font-semibold hover:bg-slate-100 transition-all"
+              className="rounded-full bg-[#B6FF3C] px-5 py-2.5 text-sm font-bold text-[#0F172A] hover:shadow-[0_10px_26px_-10px_rgba(101,163,13,0.9)]"
             >
               {t('result.startOver')}
             </button>
@@ -192,7 +189,8 @@ export const BlueprintResult = ({
             </ul>
           </div>
         </section>
-      </div>
-    </motion.main>
+        </div>
+      </Shell>
+    </motion.div>
   );
 };

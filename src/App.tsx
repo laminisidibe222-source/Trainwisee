@@ -5,6 +5,7 @@ import { BlueprintResult } from './components/BlueprintResult';
 import { AuthPage } from './components/AuthPage';
 import { PlansPage } from './components/PlansPage';
 import { Dashboard } from './components/Dashboard';
+import { Shell } from './components/dash/Shell';
 import { Toaster, toast } from 'react-hot-toast';
 import {
   createBlueprint,
@@ -89,6 +90,13 @@ function App() {
 
   /** Signed-in home: the dashboard. */
   const openDashboard = () => setView({ name: 'dashboard' });
+
+  /** One frame for every account screen, so navigation never leaves the app. */
+  const accountNavigate = (action: 'dashboard' | 'plans' | 'new') => {
+    if (action === 'dashboard') setView({ name: 'dashboard' });
+    else if (action === 'plans') setView({ name: 'plans' });
+    else setView({ name: 'wizard' });
+  };
   /**
    * Where the logo goes. A signed-in user must never be dropped back on the
    * marketing page — the account's own home is the dashboard.
@@ -187,36 +195,79 @@ function App() {
           onOpen={openSavedPlan}
           onNew={() => setView({ name: 'wizard' })}
           onHome={openHome}
-          onDashboard={openDashboard}
           onLogout={handleLogout}
         />
       )}
 
       {view.name === 'wizard' && (
-        <OnboardingWizard
-          onComplete={handleComplete}
-          onCancel={() => (user ? setView({ name: 'dashboard' }) : setView({ name: 'landing' }))}
-        />
+        user ? (
+          <AccountFrame user={user} active="new" onNavigate={accountNavigate} onLogout={handleLogout} title={t('nav.newPlan')}>
+            <OnboardingWizard
+              embedded
+              onComplete={handleComplete}
+              onCancel={() => setView({ name: 'dashboard' })}
+            />
+          </AccountFrame>
+        ) : (
+          <OnboardingWizard
+            onComplete={handleComplete}
+            onCancel={() => setView({ name: 'landing' })}
+          />
+        )
       )}
 
       {view.name === 'generating' && (
-        <div className="min-h-screen bg-white text-slate-900 flex flex-col items-center justify-center gap-4 overflow-x-clip">
-          <div className="w-10 h-10 rounded-full border-2 border-lime-600/25 border-t-lime-600 animate-spin" />
-          <p className="text-sm text-slate-600">{t('app.generating')}</p>
-        </div>
+        user ? (
+          <AccountFrame user={user} active="new" onNavigate={accountNavigate} onLogout={handleLogout} title={t('nav.newPlan')}>
+            <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
+              <div className="h-10 w-10 animate-spin rounded-full border-2 border-lime-600/25 border-t-lime-600" />
+              <p className="text-sm text-slate-600">{t('app.generating')}</p>
+            </div>
+          </AccountFrame>
+        ) : (
+          <div className="flex min-h-screen flex-col items-center justify-center gap-4 overflow-x-clip bg-white text-slate-900">
+            <div className="h-10 w-10 animate-spin rounded-full border-2 border-lime-600/25 border-t-lime-600" />
+            <p className="text-sm text-slate-600">{t('app.generating')}</p>
+          </div>
+        )
       )}
 
-      {view.name === 'result' && (
+      {view.name === 'result' && user && (
         <BlueprintResult
           plan={view.plan}
           id={view.id}
           user={user}
-          onRestart={() => setView(user ? { name: 'wizard' } : { name: 'landing' })}
+          onRestart={() => setView({ name: 'wizard' })}
+          onBack={() => setView({ name: 'plans' })}
+          onDashboard={openDashboard}
+          onPlans={openPlans}
           onLogout={handleLogout}
-          onOpenPlans={openPlans}
         />
       )}
     </>
+  );
+}
+
+/** Thin alias so account screens share one frame definition. */
+function AccountFrame({
+  user,
+  active,
+  onNavigate,
+  onLogout,
+  title,
+  children,
+}: {
+  user: User;
+  active: 'dashboard' | 'plans' | 'new';
+  onNavigate: (action: 'dashboard' | 'plans' | 'new') => void;
+  onLogout: () => void;
+  title?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <Shell user={user} active={active} onNavigate={onNavigate} onLogout={onLogout} title={title}>
+      {children}
+    </Shell>
   );
 }
 

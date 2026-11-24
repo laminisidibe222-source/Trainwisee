@@ -9,9 +9,12 @@ import { LanguageToggle, useI18n, type TKey } from '../i18n';
 export const OnboardingWizard = ({
   onComplete,
   onCancel,
+  embedded = false,
 }: {
   onComplete: (data: OnboardingData) => void;
   onCancel?: () => void;
+  /** Signed-in flow: the wizard sits inside the account frame, not full screen. */
+  embedded?: boolean;
 }) => {
   const [step, setStep] = useState(1);
   const { t } = useI18n();
@@ -49,20 +52,26 @@ export const OnboardingWizard = ({
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 flex items-center justify-center p-6 relative overflow-x-clip">
-      <div className="absolute w-[600px] h-[600px] bg-gradient-to-r from-[rgba(101,163,13,0.10)] to-[rgba(14,116,144,0.10)] blur-[140px] pointer-events-none" />
+    <div
+      className={`${
+        embedded ? 'items-start py-1' : 'min-h-screen items-center bg-white p-6'
+      } relative flex justify-center overflow-x-clip text-slate-900`}
+    >
+      {!embedded && (
+        <div className="pointer-events-none absolute h-[600px] w-[600px] bg-gradient-to-r from-[rgba(101,163,13,0.10)] to-[rgba(14,116,144,0.10)] blur-[140px]" />
+      )}
 
       <div className="glass-panel w-full max-w-2xl rounded-3xl border border-slate-200 p-8 sm:p-12 relative z-10 shadow-2xl space-y-8">
         {/* Progress Header */}
         <div className="flex items-center justify-between border-b border-slate-200 pb-6">
           <div className="flex items-center gap-3">
-            <Logo size={21} />
-            <span className="font-bold text-slate-900 text-lg">{t('wizard.title')}</span>
+            {!embedded && <Logo size={21} />}
+            <span className="text-lg font-bold text-slate-900">{t('wizard.title')}</span>
           </div>
           <span className="text-xs text-lime-700 font-semibold uppercase tracking-wider">
             {t('wizard.step', { n: step })}
           </span>
-          <LanguageToggle className="mr-3" />
+          {!embedded && <LanguageToggle className="mr-3" />}
           {onCancel && (
             <button
               onClick={onCancel}

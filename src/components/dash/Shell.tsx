@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronRight, Folders, LayoutDashboard, LogOut, Menu, Plus, Sparkles, X } from 'lucide-react';
+import { Folders, LayoutDashboard, LogOut, Menu, Plus, Sparkles, X } from 'lucide-react';
 import { Avatar, Logo } from '../Logo';
 import { LanguageToggle, useI18n } from '../../i18n';
 import type { User } from '../../lib/api';
@@ -30,6 +30,7 @@ export const Shell = ({
   onNavigate,
   onLogout,
   search,
+  title,
   planSummary,
   children,
 }: {
@@ -41,6 +42,8 @@ export const Shell = ({
   onLogout: () => void;
   /** Header search field — owned by the page, because it searches the plan. */
   search?: React.ReactNode;
+  /** Shown instead of the search field on pages that are not the dashboard. */
+  title?: React.ReactNode;
   children: React.ReactNode;
 }) => {
   const { t } = useI18n();
@@ -104,7 +107,7 @@ export const Shell = ({
                 >
                   <Icon size={16} className={on ? 'text-[#4D7C0F]' : 'text-white/45'} />
                   <span className="truncate">{t(key)}</span>
-                  {on && <ChevronRight size={14} className="ml-auto text-[#4D7C0F]" />}
+
                 </button>
               );
             })}
@@ -129,17 +132,6 @@ export const Shell = ({
               </p>
             </div>
           )}
-
-          <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.06] p-3">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#B6FF3C]">{t('nav.needPlan')}</p>
-            <p className="mt-1 text-[11px] leading-snug text-white/55">{t('nav.needPlanBody')}</p>
-            <button
-              onClick={() => go('new')}
-              className="mt-2.5 w-full rounded-full bg-[#B6FF3C] px-3 py-2 text-xs font-bold text-[#0F172A] transition-transform hover:scale-[1.02]"
-            >
-              {t('nav.newShort')}
-            </button>
-          </div>
 
           <button
             onClick={onLogout}
@@ -193,19 +185,12 @@ export const Shell = ({
       {/* ── Content ───────────────────────────────────────────── */}
       <div className="lg:pl-[276px]">
         <header className="sticky top-0 z-30 hidden items-center gap-4 border-b border-slate-900/8 bg-[#F4F5F2]/85 px-6 py-3.5 backdrop-blur lg:flex">
-          <div className="min-w-0 flex-1">{search}</div>
+          <div className="min-w-0 flex-1">{search ?? title}</div>
           <LanguageToggle />
           <span className="flex max-w-[200px] items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">
             <Avatar label={initials} size={20} />
             <span className="truncate">{user.name || user.email}</span>
           </span>
-          <button
-            onClick={onLogout}
-            aria-label={t('nav.logout')}
-            className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:border-red-200 hover:text-red-600"
-          >
-            <LogOut size={15} />
-          </button>
           <button
             onClick={() => go('new')}
             className="inline-flex items-center gap-1.5 rounded-full bg-[#B6FF3C] px-4 py-2.5 text-sm font-bold text-[#0F172A] transition-shadow hover:shadow-[0_10px_26px_-10px_rgba(101,163,13,0.9)]"

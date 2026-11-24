@@ -1,30 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, CalendarDays, Dumbbell, Flame, Loader2, LogOut, Plus, RefreshCw, Sparkles } from 'lucide-react';
+import { ArrowRight, CalendarDays, Dumbbell, Loader2, Plus, RefreshCw, ShieldAlert, Sparkles, Utensils, Waves } from 'lucide-react';
 import { getBlueprint, listBlueprints, type BlueprintSummary, type SavedBlueprint, type User } from '../lib/api';
-import { Avatar, Logo } from './Logo';
-import { LanguageToggle, useI18n, type TKey } from '../i18n';
+import { useI18n, type TKey } from '../i18n';
+import { Shell } from './dash/Shell';
 
 const when = (iso: string) =>
   new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 
 /**
- * The signed-in home. Before this existed, logging in dropped you back on the
- * marketing page with nothing to do; now the session has somewhere to land.
+ * Plan library. It lives inside the same account frame as the dashboard, so
+ * moving between "my home" and "my plans" never leaves the app shell.
  */
 export const PlansPage = ({
   user,
   onOpen,
   onNew,
   onHome,
-  onDashboard,
   onLogout,
 }: {
   user: User;
   onOpen: (plan: SavedBlueprint) => void;
   onNew: () => void;
   onHome: () => void;
-  onDashboard: () => void;
   onLogout: () => void;
 }) => {
   const [items, setItems] = useState<BlueprintSummary[] | null>(null);
@@ -54,84 +52,61 @@ export const PlansPage = ({
     }
   };
 
+  const navigate = (action: 'dashboard' | 'plans' | 'new') => {
+    if (action === 'dashboard') onHome();
+    else if (action === 'new') onNew();
+    // Already here: reload rather than navigate nowhere.
+    else load();
+  };
+
   return (
-    <motion.main
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen bg-white text-slate-900 overflow-x-clip"
-    >
-      <nav className="sticky top-0 z-50 glass-panel border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-5 min-w-0">
-          <button onClick={onHome} className="flex items-center shrink-0" aria-label="TrainWise dashboard">
-            <Logo size={22} />
-          </button>
-          <div className="hidden md:flex items-center gap-1 text-sm font-semibold">
-            <button
-              onClick={onDashboard}
-              className="px-3 py-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-            >
-              {t('nav.dashboard')}
-            </button>
-            <span className="px-3 py-2 rounded-full bg-lime-50 text-lime-800 border border-lime-200">{t('nav.myPlans')}</span>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <Shell
+        user={user}
+        active="plans"
+        onNavigate={navigate}
+        onLogout={onLogout}
+        title={
+          <div className="flex items-baseline gap-3">
+            <h1 className="text-lg font-bold tracking-tight text-slate-900">{t('nav.myPlans')}</h1>
+            {!!items?.length && (
+              <span className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-bold text-slate-500 ring-1 ring-slate-200">
+                {t('plans.count', { n: items.length })}
+              </span>
+            )}
           </div>
-        </div>
-        <div className="flex items-center gap-2 sm:gap-3">
-          <span className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-full bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 max-w-[220px]">
-            <Avatar label={user.name || user.email} size={20} />
-            <span className="truncate">{user.name || user.email}</span>
-          </span>
-          <LanguageToggle className="hidden sm:inline-flex" />
-          <button
-            onClick={onLogout}
-            aria-label="Log out"
-            className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-full border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-100 transition-all whitespace-nowrap"
-          >
-            <LogOut size={15} />
-            <span className="hidden sm:inline">{t('nav.logout')}</span>
-          </button>
-          <button
-            onClick={onNew}
-            className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-full bg-[#B6FF3C] text-black font-semibold text-sm hover:shadow-[0_8px_24px_rgba(101,163,13,0.35)] transition-all whitespace-nowrap"
-          >
-            <Plus size={15} />
-            <span className="hidden sm:inline">{t('nav.new')}</span>
-            <span className="sm:hidden">{t('nav.newShort')}</span>
-          </button>
-        </div>
-      </nav>
+        }
+      >
+        {loadingId !== null && (
+          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-[#F4F5F2]/85 backdrop-blur-sm">
+            <Loader2 size={26} className="animate-spin text-[#4D7C0F]" />
+            <p className="text-sm text-slate-600">{t('plans.opening')}</p>
+          </div>
+        )}
 
-      {loadingId !== null && (
-        <div className="fixed inset-0 z-40 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
-          <Loader2 size={26} className="animate-spin text-lime-700" />
-          <p className="text-sm text-slate-600">{t('plans.opening')}</p>
-        </div>
-      )}
-
-      <div className="max-w-5xl mx-auto px-6 py-12 space-y-8">
-        <header>
-          <p className="text-xs font-semibold uppercase tracking-wider text-lime-700">{t('plans.eyebrow')}</p>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight">
-            {t('plans.title1', { name: user.name?.split(' ')[0] || '' })} <span className="text-lime-700">{t('plans.title2')}</span>
-          </h1>
-          <p className="mt-2 text-slate-600">
-            {t('plans.sub')}
-          </p>
-        </header>
+        <section className="mb-4 rounded-3xl border border-slate-900/8 bg-white p-5 sm:p-6">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#4D7C0F]">{t('plans.eyebrow')}</p>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
+            {t('plans.title1', { name: user.name?.split(' ')[0] || '' })}{' '}
+            <span className="text-[#4D7C0F]">{t('plans.title2')}</span>
+          </h2>
+          <p className="mt-1.5 max-w-xl text-sm text-slate-600">{t('plans.sub')}</p>
+        </section>
 
         {items === null && !error && (
-          <div className="grid sm:grid-cols-2 gap-4">
-            {[0, 1].map((i) => (
-              <div key={i} className="h-40 rounded-2xl border border-slate-200 bg-slate-50 animate-pulse" />
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-[196px] animate-pulse rounded-3xl border border-slate-900/8 bg-white" />
             ))}
           </div>
         )}
 
         {error && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-red-200 bg-red-50 p-4">
             <p className="text-sm text-red-700">{error.raw ? tError(error.raw) : t('plans.error')}</p>
             <button
               onClick={load}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-red-200 text-red-700 text-sm font-semibold hover:bg-red-100 transition-all"
+              className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100"
             >
               <RefreshCw size={14} /> {t('plans.retry')}
             </button>
@@ -139,52 +114,63 @@ export const PlansPage = ({
         )}
 
         {items?.length === 0 && (
-          <div className="rounded-3xl border border-slate-200 p-10 text-center space-y-4">
-            <div className="w-12 h-12 mx-auto rounded-2xl bg-lime-100 text-lime-700 flex items-center justify-center">
+          <div className="rounded-3xl border border-slate-900/8 bg-white p-10 text-center">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-lime-100 text-[#4D7C0F]">
               <Sparkles size={22} />
             </div>
-            <div>
-              <p className="font-bold text-lg">{t('plans.empty.title')}</p>
-              <p className="text-sm text-slate-600 mt-1">{t('plans.empty.sub')}</p>
-            </div>
+            <p className="mt-3 text-lg font-bold">{t('plans.empty.title')}</p>
+            <p className="mt-1 text-sm text-slate-600">{t('plans.empty.sub')}</p>
             <button
               onClick={onNew}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#B6FF3C] text-black font-semibold text-sm hover:shadow-[0_8px_24px_rgba(101,163,13,0.35)] transition-all"
+              className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#B6FF3C] px-5 py-2.5 text-sm font-bold text-[#0F172A] hover:shadow-[0_10px_26px_-10px_rgba(101,163,13,0.9)]"
             >
-              {t('plans.empty.cta')} <ArrowRight size={16} />
+              {t('plans.empty.cta')} <ArrowRight size={15} />
             </button>
           </div>
         )}
 
         {!!items?.length && (
-          <div className="grid sm:grid-cols-2 gap-4">
-            {items.map((b) => (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {items.map((b, i) => (
               <button
                 key={b.id}
                 onClick={() => open(b.id)}
                 disabled={loadingId !== null}
-                className="group text-left rounded-2xl border border-slate-200 p-5 min-h-[148px] hover:border-lime-500/60 hover:shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all disabled:opacity-60"
+                className="group flex flex-col rounded-3xl border border-slate-900/8 bg-white p-5 text-left transition-all hover:-translate-y-0.5 hover:border-lime-400/70 hover:shadow-[0_16px_36px_-24px_rgba(15,23,42,0.45)] disabled:opacity-60"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-lime-700">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#4D7C0F]">
                       {goalLabel(b.goal)}
                     </p>
-                    <p className="mt-1.5 text-xl font-bold tracking-tight">{t('plans.card.title', { id: b.id })}</p>
+                    <p className="mt-1 truncate text-lg font-bold tracking-tight">
+                      {t('plans.card.title', { id: b.id })}
+                    </p>
                   </div>
-                  <span className="text-slate-400 group-hover:text-lime-700 transition-colors">
+                  <span className="shrink-0 text-slate-300 transition-colors group-hover:text-[#4D7C0F]">
                     {loadingId === b.id ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />}
                   </span>
                 </div>
-                <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-600">
+
+                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] font-semibold text-slate-500">
                   <span className="inline-flex items-center gap-1.5">
-                    <CalendarDays size={13} /> {when(b.createdAt)}
+                    <CalendarDays size={12} /> {when(b.createdAt)}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
-                    <Dumbbell size={13} /> {b.modelVersion || 'rules'}
+                    <Dumbbell size={12} /> {b.modelVersion || 'rules'}
                   </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <Flame size={13} /> {t('result.savedShort')}
+                </div>
+
+                <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                  {i === 0 ? (
+                    <span className="rounded-full bg-lime-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#4D7C0F]">
+                      {t('dash.active')}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-semibold text-slate-400">{t('plans.card.saved')}</span>
+                  )}
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 group-hover:text-[#4D7C0F]">
+                    {t('plans.card.open')} <ArrowRight size={12} />
                   </span>
                 </div>
               </button>
@@ -194,15 +180,43 @@ export const PlansPage = ({
                 obvious next action once you have seen your plans. */}
             <button
               onClick={onNew}
-              className="rounded-2xl border border-dashed border-slate-300 p-5 min-h-[148px] flex flex-col items-center justify-center gap-2 text-slate-500 hover:border-lime-500/60 hover:text-lime-700 hover:bg-lime-50/40 transition-all"
+              className="flex min-h-[196px] flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-slate-300 bg-white/40 p-5 text-slate-500 transition-all hover:border-lime-400 hover:text-[#4D7C0F] hover:bg-lime-50/40"
             >
               <Plus size={20} />
-              <span className="font-semibold text-sm">{t('plans.card.new')}</span>
+              <span className="text-sm font-semibold">{t('plans.card.new')}</span>
               <span className="text-xs">{t('plans.card.newSub')}</span>
             </button>
           </div>
         )}
-      </div>
-    </motion.main>
+
+        <section className="mt-6 rounded-3xl border border-slate-900/8 bg-white p-5 sm:p-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">{t('plans.engine.title')}</h2>
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">trainwise-rules-v1</span>
+          </div>
+          <p className="mt-1.5 max-w-2xl text-sm text-slate-600">{t('plans.engine.sub')}</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {[
+              { icon: Waves, title: t('plans.engine.c1'), body: t('plans.engine.c1b') },
+              { icon: Dumbbell, title: t('plans.engine.c2'), body: t('plans.engine.c2b') },
+              { icon: ShieldAlert, title: t('plans.engine.c3'), body: t('plans.engine.c3b') },
+            ].map(({ icon: Icon, title, body }) => (
+              <div key={title} className="rounded-2xl bg-[#F4F5F2] p-4">
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-white text-[#4D7C0F] ring-1 ring-slate-900/5">
+                  <Icon size={15} />
+                </span>
+                <p className="mt-2.5 text-[13px] font-bold text-slate-900">{title}</p>
+                <p className="mt-0.5 text-[11.5px] leading-relaxed text-slate-600">{body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <p className="mt-4 flex items-center gap-2 rounded-2xl border border-slate-900/8 bg-white px-4 py-3 text-[11px] text-slate-500">
+          <Utensils size={13} className="shrink-0 text-[#4D7C0F]" />
+          {t('plans.footer')}
+        </p>
+      </Shell>
+    </motion.div>
   );
 };
