@@ -276,6 +276,61 @@ export const en = {
   'dash.tile3.title': 'A 12-week roadmap',
   'dash.tile3.body': 'Four blocks with a milestone each, plus sleep, deload and cardio guidance.',
 
+  'nav.account': 'Account menu',
+  'nav.workspace': 'Workspace',
+  'nav.newPlan': 'New blueprint',
+  'nav.needPlan': 'Need a new plan?',
+  'nav.needPlanBody': 'Four questions and a fresh split lands on this page.',
+  'nav.currentPlan': 'Current plan',
+  'nav.weekOf': 'Week {n}',
+  'nav.openMenu': 'Open menu',
+  'nav.closeMenu': 'Close menu',
+
+  'hero.hello': 'Hello, {name}!',
+  'hero.body': '{n} sessions this week — next up is {focus}.',
+
+  'perf.title': 'Performance',
+  'perf.sub': 'Working sets per session · {n} sessions',
+  'perf.weekly': 'working sets this week',
+  'perf.best': 'Best day',
+  'perf.setsShort': 'sets',
+  'perf.primary': 'Main lifts',
+  'perf.accessory': 'Accessory',
+  'perf.avg': 'avg {n}',
+  'perf.all': 'All sessions',
+  'perf.chartAlt': 'Working sets per session',
+
+  'dial.title': 'Your numbers',
+  'dial.sub': 'Macros, energy intake and recovery, straight from your blueprint',
+  'dial.protein': 'Protein',
+  'dial.carbs': 'Carbs',
+  'dial.fat': 'Fat',
+  'dial.intake': 'Intake / TDEE',
+  'dial.sleep': 'Sleep',
+  'dial.block': 'Block',
+
+  'split.title': 'This week’s split',
+  'split.see': 'Open plan',
+
+  'week.title': 'This week',
+  'week.sub': '{n} sessions in the plan',
+  'week.duration': '{n} min',
+
+  'blocks.title': 'Upcoming blocks',
+  'blocks.seeAll': 'See all',
+  'blocks.weeks': 'Weeks {range}',
+
+  'search.placeholder': 'Search an exercise or a session',
+  'search.empty': 'Build a blueprint to search it',
+  'search.none': 'Nothing matches “{q}”',
+  'search.clear': 'Clear search',
+
+  'side.tipTitle': 'Cardio',
+
+  'meals.title': 'Today’s meals',
+  'meals.sub': '{n} meals in your blueprint',
+  'history.row': '#{id} · {goal}',
+
   'goal.lose_fat': 'Fat loss',
   'goal.build_muscle': 'Build muscle',
   'goal.recomp': 'Recomposition',
@@ -573,6 +628,61 @@ const fr: Record<TKey, string> = {
   'dash.tile2.body': 'MB selon Mifflin-St Jeor, DEJ selon votre activité, puis calories et protéines pour votre objectif.',
   'dash.tile3.title': 'Une feuille de route de 12 semaines',
   'dash.tile3.body': 'Quatre blocs avec un jalon chacun, plus sommeil, deload et cardio.',
+
+  'nav.account': 'Menu du compte',
+  'nav.workspace': 'Espace',
+  'nav.newPlan': 'Nouveau programme',
+  'nav.needPlan': 'Un nouveau programme ?',
+  'nav.needPlanBody': 'Quatre questions et un nouveau split arrive sur cette page.',
+  'nav.currentPlan': 'Programme en cours',
+  'nav.weekOf': 'Semaine {n}',
+  'nav.openMenu': 'Ouvrir le menu',
+  'nav.closeMenu': 'Fermer le menu',
+
+  'hero.hello': 'Bonjour, {name} !',
+  'hero.body': '{n} séances cette semaine — la prochaine : {focus}.',
+
+  'perf.title': 'Performance',
+  'perf.sub': 'Séries par séance · {n} séances',
+  'perf.weekly': 'séries cette semaine',
+  'perf.best': 'Meilleure séance',
+  'perf.setsShort': 'séries',
+  'perf.primary': 'Mouvements principaux',
+  'perf.accessory': 'Accessoires',
+  'perf.avg': 'moy. {n}',
+  'perf.all': 'Toutes les séances',
+  'perf.chartAlt': 'Séries par séance',
+
+  'dial.title': 'Vos chiffres',
+  'dial.sub': 'Macros, apports et récupération, directement issus de votre programme',
+  'dial.protein': 'Protéines',
+  'dial.carbs': 'Glucides',
+  'dial.fat': 'Lipides',
+  'dial.intake': 'Apports / DEJ',
+  'dial.sleep': 'Sommeil',
+  'dial.block': 'Bloc',
+
+  'split.title': 'Le split de la semaine',
+  'split.see': 'Ouvrir le programme',
+
+  'week.title': 'Cette semaine',
+  'week.sub': '{n} séances au programme',
+  'week.duration': '{n} min',
+
+  'blocks.title': 'Blocs à venir',
+  'blocks.seeAll': 'Tout voir',
+  'blocks.weeks': 'Semaines {range}',
+
+  'search.placeholder': 'Rechercher un exercice ou une séance',
+  'search.empty': 'Créez un programme pour le rechercher',
+  'search.none': 'Aucun résultat pour « {q} »',
+  'search.clear': 'Effacer la recherche',
+
+  'side.tipTitle': 'Cardio',
+
+  'meals.title': 'Repas du jour',
+  'meals.sub': '{n} repas dans votre programme',
+  'history.row': '#{id} · {goal}',
 
   'goal.lose_fat': 'Perte de gras',
   'goal.build_muscle': 'Prise de muscle',
