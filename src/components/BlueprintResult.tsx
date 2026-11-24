@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Flame, Dumbbell, Moon, Map, Database, ShieldAlert } from 'lucide-react';
 import type { Plan } from '../types/blueprint';
 import type { User } from '../lib/api';
-import { useI18n, type TKey } from '../i18n';
+import { planText, useI18n, type TKey } from '../i18n';
 import { Shell } from './dash/Shell';
 
 const Cell = ({
@@ -46,7 +46,7 @@ export const BlueprintResult = ({
   onLogout: () => void;
 }) => {
   const { nutritionPlan: n, trainingPlan: tp, recoveryPlan: r, roadmap } = plan;
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -124,7 +124,7 @@ export const BlueprintResult = ({
               <div key={d.day} className="glass-card rounded-2xl border border-slate-200 p-5">
                 <div className="flex items-baseline justify-between">
                   <p className="font-bold text-slate-900">{d.day}</p>
-                  <span className="text-[10px] uppercase tracking-wider text-lime-700">{d.focus}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-lime-700">{planText(lang, d.focus)}</span>
                 </div>
                 <ul className="mt-4 space-y-2">
                   {d.exercises.map((e) => (
@@ -139,7 +139,7 @@ export const BlueprintResult = ({
               </div>
             ))}
           </div>
-          <p className="text-xs text-slate-500">{tp.progression}</p>
+          <p className="text-xs text-slate-500">{planText(lang, tp.progression)}</p>
         </section>
 
         {/* injury adaptations */}
@@ -171,7 +171,7 @@ export const BlueprintResult = ({
               <Moon size={15} /> {t('result.recovery')}
             </h2>
             <p className="text-sm text-slate-700">{t('result.sleepDeload', { sleep: r.sleepTarget, weeks: r.deloadEveryWeeks })}</p>
-            <p className="text-sm text-slate-600">{r.cardio}</p>
+            <p className="text-sm text-slate-600">{planText(lang, r.cardio)}</p>
             <p className="text-xs text-slate-500">{r.readinessCheck}</p>
           </div>
           <div className="glass-card rounded-2xl border border-slate-200 p-5 space-y-3">
@@ -182,8 +182,8 @@ export const BlueprintResult = ({
               {roadmap.map((w) => (
                 <li key={w.weeks} className="text-sm">
                   <span className="font-mono text-xs text-lime-700 mr-2">W{w.weeks}</span>
-                  <span className="text-slate-900 font-semibold">{w.focus}</span>
-                  <span className="text-slate-600"> — {w.milestone}</span>
+                  <span className="text-slate-900 font-semibold">{planText(lang, w.focus)}</span>
+                  <span className="text-slate-600"> — {planText(lang, w.milestone)}</span>
                 </li>
               ))}
             </ul>

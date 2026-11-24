@@ -137,6 +137,7 @@ export const en = {
 
   'wizard.title': 'Body blueprint setup',
   'wizard.step': 'Step {n} of 4',
+  'wizard.stepShort': '{n}/4',
   'wizard.cancel': 'Cancel',
   'wizard.back': 'Back',
   'wizard.continue': 'Continue',
@@ -300,7 +301,7 @@ export const en = {
   'nav.closeMenu': 'Close menu',
 
   'hero.hello': 'Hello, {name}!',
-  'hero.body': '{n} sessions this week — next up is {focus}.',
+  'hero.body': '{n} sessions this week · next: {focus}.',
 
   'perf.title': 'Performance',
   'perf.sub': 'Working sets per session · {n} sessions',
@@ -502,6 +503,7 @@ const fr: Record<TKey, string> = {
 
   'wizard.title': 'Création du programme',
   'wizard.step': 'Étape {n} sur 4',
+  'wizard.stepShort': '{n}/4',
   'wizard.cancel': 'Annuler',
   'wizard.back': 'Retour',
   'wizard.continue': 'Continuer',
@@ -667,7 +669,7 @@ const fr: Record<TKey, string> = {
   'nav.closeMenu': 'Fermer le menu',
 
   'hero.hello': 'Bonjour, {name} !',
-  'hero.body': '{n} séances cette semaine — la prochaine : {focus}.',
+  'hero.body': '{n} séances cette semaine · prochaine : {focus}.',
 
   'perf.title': 'Performance',
   'perf.sub': 'Séries par séance · {n} séances',
@@ -819,6 +821,57 @@ export const useI18n = () => {
 };
 
 /** EN | FR pill. Small on purpose: it should be findable, not loud. */
+/**
+ * The plan engine writes its focus lines, milestones and cardio notes in
+ * English. Translating every exercise name is a bigger job, but these short
+ * generated phrases are what the dashboard shows, so they get a lookup table.
+ */
+const PLAN_FR: Record<string, string> = {
+  Strength: 'Force',
+  Hypertrophy: 'Hypertrophie',
+  Hinge: 'Charnière',
+  'Squat / press': 'Squat / développé',
+  'Hinge / pull': 'Charnière / tirage',
+  'Volume / accessory': 'Volume / accessoires',
+  'Chest / delts / triceps': 'Pectoraux / épaules / triceps',
+  'Back / biceps': 'Dos / biceps',
+  'Squat pattern': 'Mouvement squat',
+  'Hinge pattern': 'Mouvement charnière',
+  'Volume / weak points': 'Volume / points faibles',
+  'Movement / core': 'Mouvement / gainage',
+  Calibration: 'Calibration',
+  Accumulation: 'Accumulation',
+  Intensification: 'Intensification',
+  'Deload + re-test': 'Décharge + re-test',
+  'Baseline lifts and measurements logged': 'Charges et mesures de référence enregistrées',
+  '+5–8% load on main lifts, adherence ≥ 85%': '+5–8 % de charge sur les mouvements principaux, assiduité ≥ 85 %',
+  'Hold main-lift loads, adherence ≥ 85%, steps at target':
+    'Maintenir les charges, assiduité ≥ 85 %, pas à l’objectif',
+  '+2 to 3 kg lean mass': '+2 à 3 kg de masse maigre',
+  '−1.5 to 2.5 kg body weight, lifts held': '−1,5 à 2,5 kg de poids, charges maintenues',
+  'Deload week, then re-run the assessment and regenerate':
+    'Semaine de décharge, puis refaire le bilan et régénérer',
+  '2 × 20 min zone-2 for heart health, not fat loss.':
+    '2 × 20 min en zone 2 pour le cœur, pas pour perdre du gras.',
+  '3 × 30 min zone-2 plus 8k steps daily.': '3 × 30 min en zone 2 + 8 000 pas par jour.',
+  Breakfast: 'Petit-déjeuner',
+  Lunch: 'Déjeuner',
+  Dinner: 'Dîner',
+  'Pre/post session': 'Avant / après séance',
+  'Around training — fast carbs + whey': 'Autour de la séance — glucides rapides + whey',
+  'Whole-food anchor, 30 g+ protein': 'Aliments bruts, 30 g de protéines minimum',
+  'Double progression: run the rep range to the top, then add the smallest load jump.':
+    'Double progression : montez la fourchette de répétitions, puis ajoutez la plus petite charge.',
+  'Hold the loads, shorten rest by 15 s each week. Muscle retention beats PRs here.':
+    'Gardez les charges, réduisez le repos de 15 s chaque semaine. Ici, garder du muscle compte plus que les records.',
+  '2 × interval session plus 2 × 20 min zone-2.': '2 séances de fractionné + 2 × 20 min en zone 2.',
+  '3 × 30 min zone-2, keep it easy on joint recovery days':
+    '3 × 30 min en zone 2, sans forcer les jours de récupération',
+};
+
+/** Plan text in the active language, falling back to the engine's English. */
+export const planText = (lang: 'en' | 'fr', text: string) => (lang === 'fr' ? PLAN_FR[text] ?? text : text);
+
 export const LanguageToggle = ({ className = '' }: { className?: string }) => {
   const { lang, setLang } = useI18n();
   return (
@@ -833,7 +886,7 @@ export const LanguageToggle = ({ className = '' }: { className?: string }) => {
           type="button"
           onClick={() => setLang(code)}
           aria-pressed={lang === code}
-          className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors ${
+          className={`min-h-[30px] px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors ${
             lang === code ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-900'
           }`}
         >

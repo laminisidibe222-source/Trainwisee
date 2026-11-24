@@ -16,7 +16,7 @@ export const DialGrid = ({ dials }: { dials: Dial[] }) => {
       {dials.map((d) => (
         <li
           key={d.key}
-          className="flex flex-col items-center rounded-2xl border border-slate-900/6 bg-[#FAFBF8] px-2 py-3.5"
+          className="flex flex-col items-center rounded-2xl border border-slate-900/6 bg-[#FAFBF8] px-1.5 py-3"
         >
           <div className="relative h-[68px] w-[68px]">
             <svg viewBox="0 0 68 68" className="h-full w-full -rotate-90" aria-hidden>
@@ -36,8 +36,8 @@ export const DialGrid = ({ dials }: { dials: Dial[] }) => {
               {d.pct}%
             </span>
           </div>
-          <p className="mt-1.5 text-[11px] font-bold text-slate-800">{d.value}</p>
-          <p className="text-center text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+          <p className="mt-1.5 text-[12px] font-bold text-slate-800">{d.value}</p>
+          <p className="mt-0.5 text-center text-[10.5px] font-semibold uppercase leading-tight tracking-wide text-slate-500">
             {t(`dial.${d.key}` as TKey)}
           </p>
         </li>

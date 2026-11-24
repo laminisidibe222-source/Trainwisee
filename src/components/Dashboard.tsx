@@ -15,7 +15,7 @@ import {
   Utensils,
 } from 'lucide-react';
 import { getDashboard, type DashboardData, type SavedBlueprint, type User } from '../lib/api';
-import { useI18n, type TKey } from '../i18n';
+import { planText, useI18n, type TKey } from '../i18n';
 import { Shell } from './dash/Shell';
 import { PlanSearch } from './dash/PlanSearch';
 import { PerformanceBars } from './dash/PerformanceBars';
@@ -97,7 +97,7 @@ export const Dashboard = ({
   // Keep the raw message and translate on render: switching language must not
   // trigger a refetch.
   const [error, setError] = useState<{ raw: string | null } | null>(null);
-  const { t, tError } = useI18n();
+  const { t, tError, lang } = useI18n();
 
   const load = useCallback(() => {
     setError(null);
@@ -242,12 +242,12 @@ export const Dashboard = ({
                       {t('hero.hello', { name: firstName })}
                     </h1>
                     <p className="mt-1.5 max-w-md text-sm leading-relaxed text-slate-600">
-                      {t('hero.body', { n: sessions, focus: days[0]?.focus ?? plan.trainingPlan.split })}
+                      {t('hero.body', { n: sessions, focus: planText(lang, days[0]?.focus ?? plan.trainingPlan.split) })}
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       <button
                         onClick={openLatest}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-[#0F172A] px-4 py-2 text-xs font-bold text-white hover:bg-[#1B2437]"
+                        className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[#0F172A] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#1B2437]"
                       >
                         {t('dash.openFull')} <ArrowUpRight size={13} />
                       </button>
@@ -267,7 +267,7 @@ export const Dashboard = ({
               </section>
 
               {!!plan.trainingPlan.substitutions?.length && (
-                <div className="flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-[11px] text-amber-900">
+                <div className="flex items-start gap-2 rounded-2xl border border-amber-200/80 bg-amber-50/80 px-3.5 py-2.5 text-[11.5px] leading-relaxed text-amber-900">
                   <ShieldAlert size={14} className="mt-0.5 shrink-0" />
                   <span>
                     <span className="font-bold">{t('dash.adaptedTitle')}</span> ·{' '}
@@ -306,18 +306,22 @@ export const Dashboard = ({
                 <div className="mt-2">
                   <PerformanceBars days={days} />
                 </div>
-                <div className="mt-1 flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
-                  <div className="flex items-center gap-3 text-[11px] text-slate-500">
+                <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-slate-100 pt-2.5">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
                     <span className="inline-flex items-center gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-[#0F172A]" /> {t('perf.primary')}
                     </span>
                     <span className="inline-flex items-center gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-[#65A30D]" /> {t('perf.accessory')}
                     </span>
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-slate-700">
+                      <span className="h-px w-3 border-t border-dashed border-[#65A30D]" />
+                      {t('perf.avg', { n: Math.round(weekly / (days.length || 1)) })}
+                    </span>
                   </div>
                   <button
                     onClick={openLatest}
-                    className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-[11px] font-bold text-[#4D7C0F] hover:underline"
+                    className="-my-1 inline-flex min-h-9 shrink-0 items-center gap-1 whitespace-nowrap px-1 text-[11px] font-bold text-[#4D7C0F] hover:underline"
                   >
                     {t('perf.all')} <ArrowRight size={12} />
                   </button>
@@ -340,7 +344,7 @@ export const Dashboard = ({
                   right={
                     <button
                       onClick={openLatest}
-                      className="shrink-0 text-[11px] font-bold text-[#4D7C0F] hover:underline"
+                      className="-my-1 inline-flex min-h-9 shrink-0 items-center px-1 text-[11px] font-bold text-[#4D7C0F] hover:underline"
                     >
                       {t('split.see')}
                     </button>
@@ -362,15 +366,18 @@ export const Dashboard = ({
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-bold text-slate-900">
-                            {d.day} · {d.focus}
+                            {d.day} · {planText(lang, d.focus)}
                           </span>
-                          <span className="block truncate text-[11px] text-slate-500">
-                            {t('dash.exercises', { n: d.exercises })} · {d.total} {t('perf.setsShort')} · ~{d.minutes}{' '}
-                            min
+                          <span className="block text-[11px] leading-relaxed text-slate-500">
+                            {t('dash.exercises', { n: d.exercises })} · {d.total} {t('perf.setsShort')}
+                            <span className="hidden sm:inline"> · ~{d.minutes} min</span>
                           </span>
                         </span>
                         {i === 0 && (
-                          <span className="shrink-0 rounded-full border border-lime-300 bg-lime-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#4D7C0F]">
+                          <span
+                            className="hidden shrink-0 rounded-full border border-lime-300 bg-lime-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#4D7C0F] sm:inline"
+                            title={t('dash.startHere')}
+                          >
                             {t('dash.startHere')}
                           </span>
                         )}
@@ -423,7 +430,7 @@ export const Dashboard = ({
                           <ArrowUpRight size={13} className="text-slate-400" />
                         </div>
                         <p className="mt-1 text-[13px] font-bold leading-snug text-slate-900">{w.focus}</p>
-                        <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-slate-500">{w.milestone}</p>
+                        <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-slate-500">{planText(lang, w.milestone)}</p>
                       </button>
                     </li>
                   ))}
@@ -433,7 +440,9 @@ export const Dashboard = ({
                   <p className="mt-1 text-[13px] font-bold text-slate-900">
                     {plan.roadmap[0]?.focus ?? plan.trainingPlan.split}
                   </p>
-                  <p className="mt-0.5 text-[11px] leading-snug text-slate-500">{plan.roadmap[0]?.milestone}</p>
+                  <p className="mt-0.5 text-[11px] leading-snug text-slate-500">
+                    {planText(lang, plan.roadmap[0]?.milestone ?? '')}
+                  </p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-600">
                       <MoonStar size={10} className="text-[#4D7C0F]" /> {t('dash.sleep', { n: plan.recoveryPlan.sleepTarget })}
@@ -450,7 +459,10 @@ export const Dashboard = ({
                   title={t('dash.history')}
                   right={
                     (data?.totals.plans ?? 0) > 1 ? (
-                      <button onClick={onOpenPlans} className="shrink-0 text-[11px] font-bold text-[#4D7C0F] hover:underline">
+                      <button
+                        onClick={onOpenPlans}
+                        className="-my-1 inline-flex min-h-9 shrink-0 items-center px-1 text-[11px] font-bold text-[#4D7C0F] hover:underline"
+                      >
                         {t('dash.viewAll', { n: data?.totals.plans ?? 1 })}
                       </button>
                     ) : undefined
@@ -519,7 +531,9 @@ export const Dashboard = ({
                 <ul className="mt-3 space-y-1.5">
                   {plan.nutritionPlan.meals.slice(0, 4).map((m) => (
                     <li key={m.name} className="flex items-baseline justify-between gap-2 rounded-xl bg-[#FAFBF8] px-3 py-2">
-                      <span className="min-w-0 truncate text-[12px] font-semibold text-slate-800">{m.name}</span>
+                      <span className="min-w-0 truncate text-[12px] font-semibold text-slate-800">
+                        {planText(lang, m.name)}
+                      </span>
                       <span className="shrink-0 font-mono text-[10px] font-bold text-slate-500">
                         {m.kcal} kcal · {m.proteinG} g
                       </span>
@@ -532,7 +546,7 @@ export const Dashboard = ({
                 <p className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#B6FF3C]">
                   <Sparkles size={11} /> {t('side.tipTitle')}
                 </p>
-                <p className="mt-1.5 text-[11px] leading-relaxed text-white/65">{plan.recoveryPlan.cardio}</p>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-white/65">{planText(lang, plan.recoveryPlan.cardio)}</p>
                 <button
                   onClick={onNew}
                   className="mt-3 w-full rounded-full bg-[#B6FF3C] px-3 py-2 text-xs font-bold text-[#0F172A]"

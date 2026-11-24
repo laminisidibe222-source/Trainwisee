@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react';
-import { useI18n } from '../../i18n';
+import { planText, useI18n } from '../../i18n';
 import type { DayVolume } from './planView';
 
 /**
@@ -8,18 +8,19 @@ import type { DayVolume } from './planView';
  * clock times, just what the session contains.
  */
 export const SessionTimeline = ({ days, onOpen }: { days: DayVolume[]; onOpen: () => void }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   return (
-    <ol className="relative mt-4 space-y-2.5">
+    <ol className="relative mt-4 space-y-2.5 before:absolute before:bottom-4 before:left-[4.5px] before:top-4 before:w-px before:bg-slate-200">
       {days.map((d, i) => {
         const next = i === 0;
         return (
           <li key={d.day + i} className="relative pl-4">
             <span
-              className={`absolute left-0 top-3.5 h-2.5 w-2.5 rounded-full ${next ? 'bg-[#65A30D]' : 'bg-slate-300'}`}
+              className={`absolute left-0 top-3.5 z-10 h-2.5 w-2.5 rounded-full ring-2 ring-white ${
+                next ? 'bg-[#65A30D]' : 'bg-slate-300'
+              }`}
               aria-hidden
             />
-            {i > 0 && <span className="absolute left-[4.5px] -top-3 h-4 w-px bg-slate-300" aria-hidden />}
             <button
               onClick={onOpen}
               className={`w-full rounded-2xl px-3 py-2.5 text-left transition-colors ${
@@ -35,10 +36,10 @@ export const SessionTimeline = ({ days, onOpen }: { days: DayVolume[]; onOpen: (
                 </span>
               </div>
               <p className={`mt-0.5 truncate text-[11px] ${next ? 'text-white/60' : 'text-slate-500'}`}>
-                {d.focus} · {t('dash.exercises', { n: d.exercises })} · {d.total} {t('perf.setsShort')}
+                {planText(lang, d.focus)} · {t('dash.exercises', { n: d.exercises })} · {d.total} {t('perf.setsShort')}
               </p>
               {next && (
-                <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#B6FF3C]">
+                <span className="mt-1.5 inline-flex items-center gap-1 text-[10.5px] font-bold uppercase tracking-wider text-[#B6FF3C]">
                   {t('dash.startHere')} <ArrowRight size={11} />
                 </span>
               )}

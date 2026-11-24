@@ -68,8 +68,9 @@ export const OnboardingWizard = ({
             {!embedded && <Logo size={21} />}
             <span className="text-lg font-bold text-slate-900">{t('wizard.title')}</span>
           </div>
-          <span className="text-xs text-lime-700 font-semibold uppercase tracking-wider">
-            {t('wizard.step', { n: step })}
+          <span className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-wider text-lime-700 sm:text-xs">
+            <span className="sm:hidden">{t('wizard.stepShort', { n: step })}</span>
+            <span className="hidden sm:inline">{t('wizard.step', { n: step })}</span>
           </span>
           {!embedded && <LanguageToggle className="mr-3" />}
           {onCancel && (

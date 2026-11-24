@@ -2,22 +2,23 @@ import { useI18n } from '../../i18n';
 import type { DayVolume } from './planView';
 
 /**
- * Weekly working sets per session, two-tone: ink for the heavy compounds that
- * open a session, lime for the accessory work behind them. Values sit above
- * each bar and the dashed line marks the weekly average.
+ * Working sets per session, two-tone: ink for the heavy compounds that open a
+ * session, lime for the accessory work behind them. One label per bar and the
+ * average moved into the legend, so nothing has to be truncated or clipped at
+ * phone width.
  */
 export const PerformanceBars = ({ days }: { days: DayVolume[] }) => {
   const { t } = useI18n();
   const W = 520;
-  const H = 208;
+  const H = 172;
   const padTop = 26;
-  const padBottom = 46;
-  const padLeft = 26;
+  const padBottom = 30;
+  const padLeft = 22;
   const innerH = H - padTop - padBottom;
   const max = Math.max(...days.map((d) => d.total), 1);
   const avg = days.reduce((a, d) => a + d.total, 0) / (days.length || 1);
-  const bandW = (W - padLeft - 12) / (days.length || 1);
-  const barW = Math.min(38, bandW * 0.42);
+  const bandW = (W - padLeft - 10) / (days.length || 1);
+  const barW = Math.min(34, bandW * 0.44);
   const y = (v: number) => padTop + innerH - (v / max) * innerH;
 
   return (
@@ -27,7 +28,7 @@ export const PerformanceBars = ({ days }: { days: DayVolume[] }) => {
         <line
           key={f}
           x1={padLeft}
-          x2={W - 8}
+          x2={W - 6}
           y1={padTop + innerH * (1 - f)}
           y2={padTop + innerH * (1 - f)}
           stroke="#0F172A"
@@ -36,10 +37,10 @@ export const PerformanceBars = ({ days }: { days: DayVolume[] }) => {
         />
       ))}
 
-      {/* average */}
+      {/* weekly average */}
       <line
         x1={padLeft}
-        x2={W - 8}
+        x2={W - 6}
         y1={y(avg)}
         y2={y(avg)}
         stroke="#65A30D"
@@ -47,9 +48,6 @@ export const PerformanceBars = ({ days }: { days: DayVolume[] }) => {
         strokeWidth="1.2"
         strokeDasharray="5 5"
       />
-      <text x={W - 8} y={y(avg) - 6} textAnchor="end" fontSize="10" fontWeight="700" fill="#4D7C0F">
-        {t('perf.avg', { n: Math.round(avg) })}
-      </text>
 
       {days.map((d, i) => {
         const x = padLeft + bandW * i + bandW / 2;
@@ -59,7 +57,7 @@ export const PerformanceBars = ({ days }: { days: DayVolume[] }) => {
         const radius = barW / 2;
         return (
           <g key={d.day + i}>
-            <text x={x} y={top - 8} textAnchor="middle" fontSize="12" fontWeight="800" fill="#0F172A">
+            <text x={x} y={top - 7} textAnchor="middle" fontSize="13" fontWeight="800" fill="#0F172A">
               {d.total}
             </text>
             {/* accessory work sits on top so the lime reads as the finish */}
@@ -79,11 +77,8 @@ export const PerformanceBars = ({ days }: { days: DayVolume[] }) => {
               rx={radius}
               fill="#0F172A"
             />
-            <text x={x} y={H - 26} textAnchor="middle" fontSize="11" fontWeight="700" fill="#334155">
-              {d.day.length > 9 ? `${d.day.slice(0, 8)}…` : d.day}
-            </text>
-            <text x={x} y={H - 12} textAnchor="middle" fontSize="9.5" fill="#94A3B8">
-              {d.focus.length > 11 ? `${d.focus.slice(0, 10)}…` : d.focus}
+            <text x={x} y={H - 10} textAnchor="middle" fontSize="12" fontWeight="700" fill="#475569">
+              {d.day.length > 12 ? `${d.day.slice(0, 11)}…` : d.day}
             </text>
           </g>
         );
