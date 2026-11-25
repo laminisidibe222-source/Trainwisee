@@ -298,6 +298,7 @@ export const en = {
   'nav.needPlanBody': 'Four questions and a fresh split lands on this page.',
   'nav.currentPlan': 'Current plan',
   'nav.weekOf': 'Week {n}',
+  'nav.menu': 'Menu',
   'nav.openMenu': 'Open menu',
   'nav.closeMenu': 'Close menu',
 
@@ -682,6 +683,7 @@ const fr: Record<TKey, string> = {
   'nav.needPlanBody': 'Quatre questions et un nouveau split arrive sur cette page.',
   'nav.currentPlan': 'Programme en cours',
   'nav.weekOf': 'Semaine {n}',
+  'nav.menu': 'Menu',
   'nav.openMenu': 'Ouvrir le menu',
   'nav.closeMenu': 'Fermer le menu',
 
