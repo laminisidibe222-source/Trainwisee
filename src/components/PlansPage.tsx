@@ -78,17 +78,17 @@ export const PlansPage = ({
         }
       >
         {loadingId !== null && (
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-[#F4F5F2]/85 backdrop-blur-sm">
-            <Loader2 size={26} className="animate-spin text-[#4D7C0F]" />
+          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-[#F3F7F5]/85 backdrop-blur-sm">
+            <Loader2 size={26} className="animate-spin text-[#2F4A42]" />
             <p className="text-sm text-slate-600">{t('plans.opening')}</p>
           </div>
         )}
 
         <section className="mb-4 rounded-3xl border border-slate-900/8 bg-white p-5 sm:p-6">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#4D7C0F]">{t('plans.eyebrow')}</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#2F4A42]">{t('plans.eyebrow')}</p>
           <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
             {t('plans.title1', { name: user.name?.split(' ')[0] || '' })}{' '}
-            <span className="text-[#4D7C0F]">{t('plans.title2')}</span>
+            <span className="text-[#2F4A42]">{t('plans.title2')}</span>
           </h2>
           <p className="mt-1.5 max-w-xl text-sm text-slate-600">{t('plans.sub')}</p>
         </section>
@@ -115,14 +115,14 @@ export const PlansPage = ({
 
         {items?.length === 0 && (
           <div className="rounded-3xl border border-slate-900/8 bg-white p-10 text-center">
-            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-lime-100 text-[#4D7C0F]">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[#E7F0EC] text-[#2F4A42]">
               <Sparkles size={22} />
             </div>
             <p className="mt-3 text-lg font-bold">{t('plans.empty.title')}</p>
             <p className="mt-1 text-sm text-slate-600">{t('plans.empty.sub')}</p>
             <button
               onClick={onNew}
-              className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#B6FF3C] px-5 py-2.5 text-sm font-bold text-[#0F172A] hover:shadow-[0_10px_26px_-10px_rgba(101,163,13,0.9)]"
+              className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#E9B93B] px-5 py-2.5 text-sm font-bold text-[#23352F] hover:shadow-[0_10px_26px_-10px_rgba(101,163,13,0.9)]"
             >
               {t('plans.empty.cta')} <ArrowRight size={15} />
             </button>
@@ -136,18 +136,18 @@ export const PlansPage = ({
                 key={b.id}
                 onClick={() => open(b.id)}
                 disabled={loadingId !== null}
-                className="group flex flex-col rounded-3xl border border-slate-900/8 bg-white p-5 text-left transition-all hover:-translate-y-0.5 hover:border-lime-400/70 hover:shadow-[0_16px_36px_-24px_rgba(15,23,42,0.45)] disabled:opacity-60"
+                className="group flex flex-col rounded-3xl border border-slate-900/8 bg-white p-5 text-left transition-all hover:-translate-y-0.5 hover:border-[#3E5A52]/40 hover:shadow-[0_16px_36px_-24px_rgba(15,23,42,0.45)] disabled:opacity-60"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#4D7C0F]">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#2F4A42]">
                       {goalLabel(b.goal)}
                     </p>
                     <p className="mt-1 truncate text-lg font-bold tracking-tight">
                       {t('plans.card.title', { id: b.id })}
                     </p>
                   </div>
-                  <span className="shrink-0 text-slate-300 transition-colors group-hover:text-[#4D7C0F]">
+                  <span className="shrink-0 text-slate-300 transition-colors group-hover:text-[#2F4A42]">
                     {loadingId === b.id ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />}
                   </span>
                 </div>
@@ -163,13 +163,13 @@ export const PlansPage = ({
 
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
                   {i === 0 ? (
-                    <span className="rounded-full bg-lime-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#4D7C0F]">
+                    <span className="rounded-full bg-[#E9B93B]/25 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#7A5A08]">
                       {t('dash.active')}
                     </span>
                   ) : (
                     <span className="text-[10px] font-semibold text-slate-400">{t('plans.card.saved')}</span>
                   )}
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 group-hover:text-[#4D7C0F]">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 group-hover:text-[#2F4A42]">
                     {t('plans.card.open')} <ArrowRight size={12} />
                   </span>
                 </div>
@@ -180,7 +180,7 @@ export const PlansPage = ({
                 obvious next action once you have seen your plans. */}
             <button
               onClick={onNew}
-              className="flex min-h-[196px] flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-slate-300 bg-white/40 p-5 text-slate-500 transition-all hover:border-lime-400 hover:text-[#4D7C0F] hover:bg-lime-50/40"
+              className="flex min-h-[196px] flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-slate-300 bg-white/40 p-5 text-slate-500 transition-all hover:border-[#3E5A52]/50 hover:text-[#2F4A42] hover:bg-[#F3F7F5]"
             >
               <Plus size={20} />
               <span className="text-sm font-semibold">{t('plans.card.new')}</span>
@@ -201,8 +201,8 @@ export const PlansPage = ({
               { icon: Dumbbell, title: t('plans.engine.c2'), body: t('plans.engine.c2b') },
               { icon: ShieldAlert, title: t('plans.engine.c3'), body: t('plans.engine.c3b') },
             ].map(({ icon: Icon, title, body }) => (
-              <div key={title} className="rounded-2xl bg-[#F4F5F2] p-4">
-                <span className="grid h-8 w-8 place-items-center rounded-xl bg-white text-[#4D7C0F] ring-1 ring-slate-900/5">
+              <div key={title} className="rounded-2xl bg-[#F3F7F5] p-4">
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-white text-[#2F4A42] ring-1 ring-slate-900/5">
                   <Icon size={15} />
                 </span>
                 <p className="mt-2.5 text-[13px] font-bold text-slate-900">{title}</p>
@@ -213,7 +213,7 @@ export const PlansPage = ({
         </section>
 
         <p className="mt-4 flex items-center gap-2 rounded-2xl border border-slate-900/8 bg-white px-4 py-3 text-[11px] text-slate-500">
-          <Utensils size={13} className="shrink-0 text-[#4D7C0F]" />
+          <Utensils size={13} className="shrink-0 text-[#2F4A42]" />
           {t('plans.footer')}
         </p>
       </Shell>

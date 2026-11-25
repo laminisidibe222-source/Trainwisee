@@ -54,7 +54,7 @@ export const OnboardingWizard = ({
   return (
     <div
       className={`${
-        embedded ? 'items-start py-1' : 'min-h-screen items-center bg-white p-6'
+        embedded ? 'items-start justify-center' : 'min-h-screen items-center bg-white p-6'
       } relative flex justify-center overflow-x-clip text-slate-900`}
     >
       {!embedded && (
@@ -68,7 +68,7 @@ export const OnboardingWizard = ({
             {!embedded && <Logo size={21} />}
             <span className="text-lg font-bold text-slate-900">{t('wizard.title')}</span>
           </div>
-          <span className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-wider text-lime-700 sm:text-xs">
+          <span className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-wider text-[#2F4A42] sm:text-xs">
             <span className="sm:hidden">{t('wizard.stepShort', { n: step })}</span>
             <span className="hidden sm:inline">{t('wizard.step', { n: step })}</span>
           </span>
@@ -96,7 +96,7 @@ export const OnboardingWizard = ({
                     type="number"
                     value={formData.age}
                     onChange={e => updateField('age', Number(e.target.value))}
-                    className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-lime-500 outline-none transition-colors"
+                    className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-[#3E5A52] outline-none transition-colors"
                   />
                 </div>
                 <div>
@@ -104,7 +104,7 @@ export const OnboardingWizard = ({
                   <select
                     value={formData.sex}
                     onChange={e => updateField('sex', e.target.value)}
-                    className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-lime-500 outline-none transition-colors"
+                    className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-[#3E5A52] outline-none transition-colors"
                   >
                     <option value="male">{t('wizard.sex.male')}</option>
                     <option value="female">{t('wizard.sex.female')}</option>
@@ -117,7 +117,7 @@ export const OnboardingWizard = ({
                     type="number"
                     value={formData.heightCm}
                     onChange={e => updateField('heightCm', Number(e.target.value))}
-                    className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-lime-500 outline-none transition-colors"
+                    className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-[#3E5A52] outline-none transition-colors"
                   />
                 </div>
                 <div>
@@ -126,7 +126,7 @@ export const OnboardingWizard = ({
                     type="number"
                     value={formData.weightKg}
                     onChange={e => updateField('weightKg', Number(e.target.value))}
-                    className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-lime-500 outline-none transition-colors"
+                    className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-[#3E5A52] outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -148,7 +148,7 @@ export const OnboardingWizard = ({
                     <div
                       key={g.id}
                       onClick={() => updateField('goal', g.id)}
-                      className={`glass-card p-4 rounded-2xl border cursor-pointer transition-all ${formData.goal === g.id ? 'border-lime-500 bg-[#B6FF3C]/10' : 'border-slate-200'}`}
+                      className={`glass-card p-4 rounded-2xl border cursor-pointer transition-all ${formData.goal === g.id ? 'border-[#3E5A52] bg-[#E7F0EC]' : 'border-slate-200'}`}
                     >
                       <p className="font-bold text-slate-900">{g.title}</p>
                       <p className="text-xs text-slate-600 mt-1">{g.desc}</p>
@@ -175,7 +175,7 @@ export const OnboardingWizard = ({
                           const updated = selected ? current.filter(x => x !== eq) : [...current, eq];
                           updateField('equipment', updated);
                         }}
-                        className={`glass-card p-3 rounded-xl border text-center cursor-pointer capitalize text-sm font-semibold transition-all ${selected ? 'border-lime-500 bg-[#B6FF3C]/10 text-lime-700' : 'border-slate-200 text-slate-700'}`}
+                        className={`glass-card p-3 rounded-xl border text-center cursor-pointer capitalize text-sm font-semibold transition-all ${selected ? 'border-[#3E5A52] bg-[#E7F0EC] text-[#2F4A42]' : 'border-slate-200 text-slate-700'}`}
                       >
                         {t(`wizard.eq.${eq}` as TKey)}
                       </div>
@@ -236,7 +236,7 @@ export const OnboardingWizard = ({
                   <select
                     value={formData.dietPreference}
                     onChange={e => updateField('dietPreference', e.target.value)}
-                    className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-lime-500 outline-none transition-colors"
+                    className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-[#3E5A52] outline-none transition-colors"
                   >
                     <option value="standard">{t('wizard.diet.standard')}</option>
                     <option value="vegetarian">{t('wizard.diet.vegetarian')}</option>
@@ -251,7 +251,7 @@ export const OnboardingWizard = ({
                     type="number"
                     value={formData.sleepHours}
                     onChange={e => updateField('sleepHours', Number(e.target.value))}
-                    className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-lime-500 outline-none transition-colors"
+                    className="w-full mt-2 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:border-[#3E5A52] outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -271,7 +271,7 @@ export const OnboardingWizard = ({
           ) : <div />}
           <button
             onClick={handleNext}
-            className="px-8 py-3 rounded-full bg-[#B6FF3C] text-black font-bold text-sm hover:shadow-[0_8px_24px_rgba(101,163,13,0.35)] transition-all flex items-center gap-2"
+            className="px-8 py-3 rounded-full bg-[#E9B93B] text-[#23352F] font-extrabold text-sm hover:shadow-[0_10px_24px_-10px_rgba(233,185,59,0.9)] transition-all flex items-center gap-2"
           >
             {step === 4 ? t('wizard.generate') : t('wizard.continue')} <ArrowRight size={16} />
           </button>

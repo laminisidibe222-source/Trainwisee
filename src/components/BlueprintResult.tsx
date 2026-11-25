@@ -86,7 +86,7 @@ export const BlueprintResult = ({
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={onRestart}
-              className="rounded-full bg-[#B6FF3C] px-5 py-2.5 text-sm font-bold text-[#0F172A] hover:shadow-[0_10px_26px_-10px_rgba(101,163,13,0.9)]"
+              className="rounded-full bg-[#E9B93B] px-5 py-2.5 text-sm font-bold text-[#23352F] hover:shadow-[0_10px_26px_-10px_rgba(101,163,13,0.9)]"
             >
               {t('result.startOver')}
             </button>
@@ -172,7 +172,7 @@ export const BlueprintResult = ({
             </h2>
             <p className="text-sm text-slate-700">{t('result.sleepDeload', { sleep: r.sleepTarget, weeks: r.deloadEveryWeeks })}</p>
             <p className="text-sm text-slate-600">{planText(lang, r.cardio)}</p>
-            <p className="text-xs text-slate-500">{r.readinessCheck}</p>
+            <p className="text-xs text-slate-500">{planText(lang, r.readinessCheck)}</p>
           </div>
           <div className="glass-card rounded-2xl border border-slate-200 p-5 space-y-3">
             <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-slate-600">

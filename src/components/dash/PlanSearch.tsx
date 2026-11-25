@@ -21,7 +21,7 @@ export const PlanSearch = ({ plan, onOpen }: { plan: Plan | null; onOpen: () => 
     <div className="relative max-w-md">
       <div
         className={`flex items-center gap-2 rounded-full border bg-white px-3.5 py-2 ${
-          disabled ? 'border-slate-200/70 opacity-60' : 'border-slate-200 focus-within:border-[#65A30D]'
+          disabled ? 'border-slate-200/70 opacity-60' : 'border-slate-200 focus-within:border-[#3E5A52]'
         }`}
       >
         <Search size={15} className="shrink-0 text-slate-400" />
@@ -59,7 +59,7 @@ export const PlanSearch = ({ plan, onOpen }: { plan: Plan | null; onOpen: () => 
                       setQ('');
                       onOpen();
                     }}
-                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left hover:bg-[#F4F5F2]"
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left hover:bg-[#F3F7F5]"
                   >
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold text-slate-800">{h.exercise}</span>

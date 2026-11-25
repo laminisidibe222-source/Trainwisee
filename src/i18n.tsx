@@ -265,6 +265,7 @@ export const en = {
   'dash.protein': 'Protein',
   'dash.sessions': 'Sessions',
   'dash.perWeek': '/ week',
+  'dash.today': 'today',
   'dash.weekOf': 'Week {n} of 12',
   'dash.split': 'This week’s split',
   'dash.startHere': 'Start here',
@@ -305,6 +306,21 @@ export const en = {
 
   'perf.title': 'Performance',
   'perf.sub': 'Working sets per session · {n} sessions',
+  'share.title': 'Macro split',
+  'share.sub': 'Where the calories come from',
+  'share.kcal': 'kcal',
+  'area.title': 'Week profile',
+  'area.sub': 'Main lifts vs accessory work',
+  'dash.kcalDay': 'Daily calories',
+  'dash.sessionsCard': 'Sessions',
+  'dash.setsWeek': 'Working sets',
+  'dash.col.session': 'Session',
+  'dash.col.focus': 'Focus',
+  'dash.col.ex': 'Exercises',
+  'dash.col.sets': 'Sets',
+  'dash.col.time': 'Time',
+  'dash.weekVs': 'vs last week',
+
   'perf.weekly': 'working sets this week',
   'perf.best': 'Best day',
   'perf.setsShort': 'sets',
@@ -633,6 +649,7 @@ const fr: Record<TKey, string> = {
   'dash.protein': 'Protéines',
   'dash.sessions': 'Séances',
   'dash.perWeek': '/ semaine',
+  'dash.today': "aujourd'hui",
   'dash.weekOf': 'Semaine {n} sur 12',
   'dash.split': 'Le split de la semaine',
   'dash.startHere': 'Commencez ici',
@@ -673,6 +690,21 @@ const fr: Record<TKey, string> = {
 
   'perf.title': 'Performance',
   'perf.sub': 'Séries par séance · {n} séances',
+  'share.title': 'Répartition des macros',
+  'share.sub': 'D’où viennent les calories',
+  'share.kcal': 'kcal',
+  'area.title': 'Profil de la semaine',
+  'area.sub': 'Mouvements principaux vs accessoires',
+  'dash.kcalDay': 'Calories / jour',
+  'dash.sessionsCard': 'Séances',
+  'dash.setsWeek': 'Séries de travail',
+  'dash.col.session': 'Séance',
+  'dash.col.focus': 'Focus',
+  'dash.col.ex': 'Exercices',
+  'dash.col.sets': 'Séries',
+  'dash.col.time': 'Durée',
+  'dash.weekVs': 'vs semaine dernière',
+
   'perf.weekly': 'séries cette semaine',
   'perf.best': 'Meilleure séance',
   'perf.setsShort': 'séries',
@@ -870,6 +902,8 @@ const PLAN_FR: Record<string, string> = {
   '2 × interval session plus 2 × 20 min zone-2.': '2 séances de fractionné + 2 × 20 min en zone 2.',
   '3 × 30 min zone-2, keep it easy on joint recovery days':
     '3 × 30 min en zone 2, sans forcer les jours de récupération',
+  'Morning resting HR and grip strength — if both drop for 3 days, take a deload.':
+    'FC de repos au réveil et force de préhension — si les deux baissent 3 jours de suite, faites une décharge.',
 };
 
 /** Plan text in the active language, falling back to the engine's English. */

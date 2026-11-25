@@ -214,9 +214,11 @@ function App() {
     <>
       <Toaster position="bottom-right" />
       {showGenerating && (
-        <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-3 bg-white/80 backdrop-blur-sm">
-          <div className="h-9 w-9 animate-spin rounded-full border-2 border-lime-600/25 border-t-lime-600" />
-          <p className="text-sm text-slate-600">{generating ? t('app.generating') : t('plans.opening')}</p>
+        <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-3 bg-[#E7F0EC]/85 backdrop-blur-sm">
+          <div className="h-9 w-9 animate-spin rounded-full border-2 border-[#3E5A52]/20 border-t-[#3E5A52]" />
+          <p className="text-sm font-semibold text-[#3E5A52]">
+            {generating ? t('app.generating') : t('plans.opening')}
+          </p>
         </div>
       )}
 
