@@ -23,7 +23,7 @@ export const ShareDonut = ({ proteinG, carbsG, fatG, kcal }: { proteinG: number;
 
   let offset = 0;
   return (
-    <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-5">
+    <div className="flex flex-col items-center gap-4">
       <div className="relative h-[152px] w-[152px] shrink-0">
         <svg viewBox="0 0 152 152" className="h-full w-full -rotate-90" role="img" aria-label={t('dial.title')}>
           <circle cx="76" cy="76" r={R} fill="none" stroke={C.canvasDeep} strokeWidth={STROKE} />
@@ -59,9 +59,9 @@ export const ShareDonut = ({ proteinG, carbsG, fatG, kcal }: { proteinG: number;
         {slices.map((s) => (
           <li key={s.key} className="flex items-center gap-2.5">
             <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: s.color }} />
-            <span className="min-w-0 flex-1 truncate text-[12px] font-semibold text-[#23352F]">{s.label}</span>
-            <span className="shrink-0 text-[11px] font-bold tabular-nums text-[#6B7F78]">{s.grams} g</span>
-            <span className="w-9 shrink-0 text-right text-[11px] font-bold tabular-nums text-[#23352F]">
+            <span className="min-w-0 flex-1 text-[11.5px] font-semibold text-[#23352F]">{s.label}</span>
+            <span className="shrink-0 text-[10.5px] font-bold tabular-nums text-[#6E7A6B]">{s.grams} g</span>
+            <span className="w-8 shrink-0 text-right text-[10.5px] font-bold tabular-nums text-[#1B241C]">
               {Math.round((s.kcal / total) * 100)}%
             </span>
           </li>
