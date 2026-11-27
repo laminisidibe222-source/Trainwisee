@@ -123,13 +123,13 @@ export const BlueprintResult = ({
             {tp.days.map((d) => (
               <div key={d.day} className="glass-card rounded-2xl border border-slate-200 p-5">
                 <div className="flex items-baseline justify-between">
-                  <p className="font-bold text-slate-900">{d.day}</p>
+                  <p className="font-bold text-slate-900">{planText(lang, d.day)}</p>
                   <span className="text-[10px] uppercase tracking-wider text-lime-700">{planText(lang, d.focus)}</span>
                 </div>
                 <ul className="mt-4 space-y-2">
                   {d.exercises.map((e) => (
                     <li key={e.name} className="flex justify-between text-sm text-slate-700">
-                      <span>{e.name}</span>
+                      <span>{planText(lang, e.name)}</span>
                       <span className="font-mono text-xs text-slate-600">
                         {e.sets} × {e.reps}
                       </span>

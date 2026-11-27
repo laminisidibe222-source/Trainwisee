@@ -30,7 +30,7 @@ export const SessionTimeline = ({ days, onOpen }: { days: DayVolume[]; onOpen: (
               }`}
             >
               <div className="flex items-baseline justify-between gap-2">
-                <p className={`truncate text-[13px] font-bold ${next ? 'text-white' : 'text-slate-900'}`}>{d.day}</p>
+                <p className={`truncate text-[13px] font-bold ${next ? 'text-white' : 'text-slate-900'}`}>{planText(lang, d.day)}</p>
                 <span className={`shrink-0 text-[10px] font-semibold ${next ? 'text-[#E9B93B]' : 'text-slate-500'}`}>
                   ~{d.minutes} min
                 </span>

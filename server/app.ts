@@ -26,6 +26,7 @@ import { fileURLToPath } from 'node:url';
 import { db, sql as neon } from '../src/db/index.js';
 import { users, profiles, blueprints, sessions, checkins } from '../src/db/schema.js';
 import { generateBlueprint } from './plan.js';
+import { applyWebhook, createCheckout, isPlanId } from './pay.js';
 import { onboardingSchema } from '../src/types/onboarding.js';
 import {
   SESSION_COOKIE,
@@ -53,7 +54,15 @@ app.disable('x-powered-by');
 // Behind Vercel (or any single reverse proxy) req.ip is the proxy address, which
 // would make the rate limiter one global bucket. Trust exactly one hop there.
 if (process.env.VERCEL) app.set('trust proxy', 1);
-app.use(express.json({ limit: '64kb' }));
+app.use(
+  express.json({
+    limit: '64kb',
+    // SasPay signs the exact bytes it sent, so keep a copy before parsing.
+    verify: (req, _res, buf) => {
+      (req as typeof req & { rawBody?: Buffer }).rawBody = Buffer.from(buf);
+    },
+  }),
+);
 
 /* ---------------- session plumbing ---------------- */
 
@@ -363,6 +372,34 @@ app.get('/api/blueprint/:id', async (req, res) => {  const user = requireUser(re
     console.error('[blueprint:get]', err);
     res.status(503).json({ ok: false, error: 'database unavailable' });
   }
+});
+
+/* ---------------- payments ---------------- */
+
+/** Starts a hosted SasPay checkout for a paid plan. Auth required. */
+app.post('/api/pay/checkout', async (req, res) => {
+  const user = requireUser(req, res);
+  if (!user) return;
+
+  const planId = (req.body as { plan?: unknown } | undefined)?.plan;
+  if (!isPlanId(planId)) {
+    return res.status(400).json({ error: 'Unknown plan.' });
+  }
+
+  const result = await createCheckout({ id: user.id, email: user.email, name: user.name ?? null }, planId);
+  if (!result.ok) return res.status(result.status).json({ error: result.error });
+  return res.json({ ok: true, url: result.url });
+});
+
+/** SasPay IPN. Signature-verified, so no session is required here. */
+app.post('/api/pay/webhook', async (req, res) => {
+  const raw =
+    (req as typeof req & { rawBody?: Buffer }).rawBody ?? Buffer.from(JSON.stringify(req.body ?? {}), 'utf8');
+  const result = await applyWebhook(raw, {
+    signature: req.header('x-webhook-signature') ?? undefined,
+    timestamp: req.header('x-webhook-timestamp') ?? undefined,
+  });
+  return res.status(result.status).json(result.body);
 });
 
 /* ---------------- public routes ---------------- */

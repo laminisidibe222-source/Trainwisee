@@ -365,7 +365,7 @@ export const Dashboard = ({
                             {i + 1}
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-[12px] font-bold">{d.day}</span>
+                            <span className="block truncate text-[12px] font-bold">{planText(lang, d.day)}</span>
                             <span className="block truncate text-[10px] text-[#6E7A6B]">
                               {planText(lang, d.focus)} · {t('dash.exercises', { n: d.exercises })}
                             </span>
@@ -427,7 +427,7 @@ export const Dashboard = ({
                   {days.map((d, i) => (
                     <li key={`row-${d.day}-${i}`} className="flex items-center gap-3">
                       <span className="w-[86px] shrink-0 truncate text-[10.5px] font-semibold text-[#4A5A48]">
-                        {d.day}
+                        {planText(lang, d.day)}
                       </span>
                       <span className="relative h-3 flex-1 overflow-hidden rounded-full bg-[#F1F3EC]">
                         <span

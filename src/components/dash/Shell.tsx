@@ -113,7 +113,7 @@ const Panel = ({
       )}
 
       <div className="mt-5 border-t border-white/10 pt-4">
-        <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-white/35">GENERAL</p>
+        <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-white/35">{t('nav.general')}</p>
         <button
           onClick={onLogout}
           className="mt-2 flex min-h-10 w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[12.5px] font-semibold text-white/60 transition-colors hover:bg-white/[0.05] hover:text-white"

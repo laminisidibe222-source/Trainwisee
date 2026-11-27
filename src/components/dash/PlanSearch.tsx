@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Search, X } from 'lucide-react';
-import { useI18n } from '../../i18n';
+import { planText, useI18n } from '../../i18n';
 import type { Plan } from '../../types/blueprint';
 import { searchPlan } from './planView';
 
@@ -10,7 +10,7 @@ import { searchPlan } from './planView';
  * has every exercise listed).
  */
 export const PlanSearch = ({ plan, onOpen }: { plan: Plan | null; onOpen: () => void }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
   const hits = useMemo(() => (plan ? searchPlan(plan, q) : []), [plan, q]);
@@ -62,9 +62,9 @@ export const PlanSearch = ({ plan, onOpen }: { plan: Plan | null; onOpen: () => 
                     className="flex w-full items-center gap-2 px-4 py-2.5 text-left hover:bg-[#F3F7F5]"
                   >
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold text-slate-800">{h.exercise}</span>
+                      <span className="block truncate text-sm font-semibold text-slate-800">{planText(lang, h.exercise)}</span>
                       <span className="block truncate text-[11px] text-slate-500">
-                        {h.day} · {h.focus}
+                        {planText(lang, h.day)} · {planText(lang, h.focus)}
                       </span>
                     </span>
                   </button>

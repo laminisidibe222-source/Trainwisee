@@ -81,6 +81,9 @@ export const subscriptions = pgTable('subscriptions', {
     .notNull(),
   plan: text('plan').notNull(),
   status: text('status').notNull(),
+  provider: text('provider'),
+  providerToken: text('provider_token'),
   stripeCustomerId: text('stripe_customer_id'),
   currentPeriodEnd: timestamp('current_period_end'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });

@@ -92,6 +92,21 @@ export type BlueprintSummary = {
 /** A saved blueprint, shaped like the POST /api/blueprint response. */
 export type SavedBlueprint = { id: number; createdAt: string; modelVersion: string | null; plan: Plan };
 
+export async function startCheckout(plan: 'starter' | 'pro' | 'coached'): Promise<{ url?: string; error?: string }> {
+  try {
+    const res = await fetch(`${BASE}/pay/checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan }),
+    });
+    const body = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
+    if (!res.ok) return { error: body?.error ?? 'checkout_failed' };
+    return { url: body?.url };
+  } catch {
+    return { error: 'network' };
+  }
+}
+
 export async function getBlueprint(id: number): Promise<SavedBlueprint> {
   const res = await request<{
     ok: true;

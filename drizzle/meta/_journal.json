@@ -22,6 +22,13 @@
       "when": 1795438085899,
       "tag": "0002_loud_norman_osborn",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795738283656,
+      "tag": "0003_right_nehzno",
+      "breakpoints": true
     }
   ]
 }

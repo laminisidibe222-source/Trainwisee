@@ -1,4 +1,4 @@
-import { useI18n } from '../../i18n';
+import { planText, useI18n } from '../../i18n';
 import type { DayVolume } from './planView';
 import { C } from './theme';
 
@@ -8,7 +8,7 @@ import { C } from './theme';
  * single label per bar, so it stays legible at phone width.
  */
 export const PerformanceBars = ({ days }: { days: DayVolume[] }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const W = 340;
   const H = 190;
   const padTop = 16;
@@ -80,7 +80,7 @@ export const PerformanceBars = ({ days }: { days: DayVolume[] }) => {
               fill={C.panel}
             />
             <text x={x} y={H - 10} textAnchor="middle" fontSize="10.5" fontWeight="700" fill={C.muted}>
-              {d.day.length > 9 ? `${d.day.slice(0, 8)}…` : d.day}
+              {planText(lang, d.day).length > 9 ? `${planText(lang, d.day).slice(0, 8)}…` : planText(lang, d.day)}
             </text>
           </g>
         );

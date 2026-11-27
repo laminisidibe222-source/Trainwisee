@@ -1,4 +1,4 @@
-import { useI18n } from '../../i18n';
+import { planText, useI18n } from '../../i18n';
 import type { DayVolume } from './planView';
 import { C } from './theme';
 
@@ -8,7 +8,7 @@ import { C } from './theme';
  * needs a hover state to be readable.
  */
 export const WeeklyArea = ({ days }: { days: DayVolume[] }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const W = 360;
   const H = 200;
   const padX = 30;
@@ -71,7 +71,7 @@ export const WeeklyArea = ({ days }: { days: DayVolume[] }) => {
           <circle cx={x(i)} cy={y(d.primary)} r="3.4" fill={C.panel} stroke="#fff" strokeWidth="1.8" />
           <circle cx={x(i)} cy={y(d.accessory)} r="2.6" fill={C.mustard} stroke="#fff" strokeWidth="1.4" />
           <text x={x(i)} y={H - 8} textAnchor="middle" fontSize="10.5" fontWeight="700" fill={C.muted}>
-            {d.day.length > 10 ? `${d.day.slice(0, 9)}…` : d.day}
+            {planText(lang, d.day).length > 10 ? `${planText(lang, d.day).slice(0, 9)}…` : planText(lang, d.day)}
           </text>
         </g>
       ))}
