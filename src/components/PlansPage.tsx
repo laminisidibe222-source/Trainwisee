@@ -78,7 +78,7 @@ export const PlansPage = ({
         }
       >
         {loadingId !== null && (
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-[#F3F7F5]/85 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-[#F4F5F7]/85 backdrop-blur-sm">
             <Loader2 size={26} className="animate-spin text-[#2F4A42]" />
             <p className="text-sm text-slate-600">{t('plans.opening')}</p>
           </div>
@@ -115,14 +115,14 @@ export const PlansPage = ({
 
         {items?.length === 0 && (
           <div className="rounded-3xl border border-slate-900/8 bg-white p-10 text-center">
-            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[#E7F0EC] text-[#2F4A42]">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[#EEF2FF] text-[#2952FF]">
               <Sparkles size={22} />
             </div>
             <p className="mt-3 text-lg font-bold">{t('plans.empty.title')}</p>
             <p className="mt-1 text-sm text-slate-600">{t('plans.empty.sub')}</p>
             <button
               onClick={onNew}
-              className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#E9B93B] px-5 py-2.5 text-sm font-bold text-[#23352F] hover:shadow-[0_10px_26px_-10px_rgba(101,163,13,0.9)]"
+              className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#2952FF] px-5 py-2.5 text-sm font-bold text-white hover:shadow-[0_10px_26px_-14px_rgba(41,82,255,0.9)]"
             >
               {t('plans.empty.cta')} <ArrowRight size={15} />
             </button>
@@ -163,7 +163,7 @@ export const PlansPage = ({
 
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
                   {i === 0 ? (
-                    <span className="rounded-full bg-[#E9B93B]/25 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#7A5A08]">
+                    <span className="rounded-full bg-[#EEF2FF] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#2952FF]">
                       {t('dash.active')}
                     </span>
                   ) : (
@@ -180,7 +180,7 @@ export const PlansPage = ({
                 obvious next action once you have seen your plans. */}
             <button
               onClick={onNew}
-              className="flex min-h-[196px] flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-slate-300 bg-white/40 p-5 text-slate-500 transition-all hover:border-[#3E5A52]/50 hover:text-[#2F4A42] hover:bg-[#F3F7F5]"
+              className="flex min-h-[196px] flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-slate-300 bg-white/40 p-5 text-slate-500 transition-all hover:border-[#2952FF]/50 hover:text-[#2952FF] hover:bg-[#F7F8FF]"
             >
               <Plus size={20} />
               <span className="text-sm font-semibold">{t('plans.card.new')}</span>
@@ -201,7 +201,7 @@ export const PlansPage = ({
               { icon: Dumbbell, title: t('plans.engine.c2'), body: t('plans.engine.c2b') },
               { icon: ShieldAlert, title: t('plans.engine.c3'), body: t('plans.engine.c3b') },
             ].map(({ icon: Icon, title, body }) => (
-              <div key={title} className="rounded-2xl bg-[#F3F7F5] p-4">
+              <div key={title} className="rounded-2xl bg-[#F2F5FF] p-4">
                 <span className="grid h-8 w-8 place-items-center rounded-xl bg-white text-[#2F4A42] ring-1 ring-slate-900/5">
                   <Icon size={15} />
                 </span>

@@ -1,23 +1,27 @@
 /**
- * Account-area palette, rebuilt from the reference sales dashboard: a light
- * grey canvas, one large white app card, a near-black forest-green sidebar and
- * a single lime accent that carries the active state, charts and highlights.
+ * Account-area palette, rebuilt from the blue "command palette" reference: a
+ * royal-blue sidebar, a white secondary panel, a light-grey canvas and a single
+ * electric blue accent. Legacy keys stay so the charts keep compiling.
  */
 export const C = {
-  canvas: '#E8E9E3',
-  canvasDeep: '#DFE3D6',
-  panel: '#16281A',
-  panelDeep: '#1F3522',
-  ink: '#1B241C',
-  muted: '#6E7A6B',
-  lime: '#A8E04A',
-  limeSoft: '#D6F0A8',
-  orange: '#E0A83A',
-  red: '#C0503C',
-  sage: '#DDE7D2',
-  line: 'rgba(27, 36, 28, 0.10)',
-  // Legacy names still referenced by the older chart components.
-  mustard: '#A8E04A',
-  mustardSoft: '#D6F0A8',
-  teal: '#7EC24A',
+  canvas: '#F4F5F7',
+  canvasDeep: '#E8EBF2',
+  panel: '#1A1F36',
+  panelDeep: '#11152A',
+  ink: '#1A1F36',
+  muted: '#8A94A6',
+  blue: '#2952FF',
+  blueDark: '#1B3AD9',
+  paleBlue: '#E8F0FE',
+  amber: '#F5A524',
+  red: '#D6455D',
+  line: 'rgba(26, 31, 54, 0.08)',
+  // Legacy aliases used by PerformanceBars / ShareDonut.
+  lime: '#2952FF',
+  limeSoft: '#B9C6FF',
+  orange: '#F5A524',
+  sage: '#EEF1FF',
+  mustard: '#7C93FF',
+  mustardSoft: '#CDD7FF',
+  teal: '#5B7BFF',
 } as const;

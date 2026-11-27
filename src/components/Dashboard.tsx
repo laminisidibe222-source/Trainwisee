@@ -4,15 +4,19 @@ import {
   ArrowRight,
   ArrowUpRight,
   CalendarDays,
-  ChevronDown,
+  ChevronRight,
   Dumbbell,
   Flame,
+  HeartPulse,
+  Layers,
   MoonStar,
+  PanelLeftClose,
+  PanelLeftOpen,
   Plus,
   RefreshCw,
-  ShieldAlert,
   Sparkles,
   Timer,
+  Utensils,
 } from 'lucide-react';
 import { getDashboard, startCheckout, type DashboardData, type SavedBlueprint, type User } from '../lib/api';
 import { planText, useI18n, type TKey } from '../i18n';
@@ -26,41 +30,29 @@ import { PLANS, isPlanId, money, planAmount, type PlanId } from '../lib/plans';
 import type { Plan } from '../types/blueprint';
 
 /**
- * Signed-in home, laid out like the reference sales dashboard: a dark sidebar,
- * one rounded white app card, three stat tiles (the first dark), a week list
- * beside a two-tone volume chart, a horizontal breakdown and a right rail with
- * the macro donut and a sage upgrade card.
+ * Signed-in home, rebuilt from the blue "command palette" reference: a royal
+ * blue sidebar, a white rail of session cards and a light canvas holding the
+ * search row, quick suggestions and a tabbed grid of plan cards.
  */
 
-const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <section className={`rounded-[14px] border border-black/[0.07] bg-white p-4 ${className}`}>{children}</section>
+type Tab = 'sessions' | 'nutrition' | 'recovery' | 'plan';
+
+const Panel = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <section className={`rounded-[12px] border border-black/[0.05] bg-white p-4 shadow-[0_10px_30px_-26px_rgba(20,28,60,0.5)] ${className}`}>
+    {children}
+  </section>
 );
 
-const CardHead = ({ title, sub, right }: { title: string; sub?: string; right?: React.ReactNode }) => (
+const Head = ({ title, sub, right }: { title: string; sub?: string; right?: React.ReactNode }) => (
   <div className="flex items-start justify-between gap-3">
     <div className="min-w-0">
-      <h2 className="text-[14px] font-extrabold tracking-tight">{title}</h2>
-      {sub && <p className="mt-0.5 text-[11px] text-[#6E7A6B]">{sub}</p>}
+      <h2 className="text-[13.5px] font-bold" style={{ color: C.ink }}>
+        {title}
+      </h2>
+      {sub && <p className="mt-0.5 text-[10.5px] text-[#8A94A6]">{sub}</p>}
     </div>
     {right}
   </div>
-);
-
-const Trend = ({ value, label, tone = 'up' }: { value: string; label: string; tone?: 'up' | 'down' }) => (
-  <p className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-[#6E7A6B]">
-    <span
-      className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-extrabold"
-      style={
-        tone === 'up'
-          ? { background: 'rgba(168,224,74,0.22)', color: '#3F5A16' }
-          : { background: 'rgba(192,80,60,0.12)', color: '#9E3A28' }
-      }
-    >
-      <ArrowUpRight size={10} className={tone === 'down' ? 'rotate-90' : ''} />
-      {value}
-    </span>
-    {label}
-  </p>
 );
 
 export const Dashboard = ({
@@ -82,6 +74,8 @@ export const Dashboard = ({
 }) => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<{ raw: string | null } | null>(null);
+  const [tab, setTab] = useState<Tab>('sessions');
+  const [railOpen, setRailOpen] = useState(true);
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState(false);
   const [choice, setChoice] = useState<PlanId>('pro');
@@ -113,8 +107,6 @@ export const Dashboard = ({
   const weekly = weeklySets(days);
   const sessions = plan?.trainingPlan.frequency ?? days.length;
   const weekMinutes = days.reduce((a, d) => a + d.minutes, 0);
-  const primarySets = days.reduce((a, d) => a + d.primary, 0);
-  const accessorySets = days.reduce((a, d) => a + d.accessory, 0);
 
   const sub = data?.subscription ?? null;
   const activePlan = sub?.status === 'active' && isPlanId(sub.plan) ? sub.plan : null;
@@ -122,26 +114,20 @@ export const Dashboard = ({
   useEffect(() => {
     if (activePlan) setChoice(activePlan);
   }, [activePlan]);
-  const planLabel = activePlan
-    ? t(`plan.${activePlan}` as TKey)
-    : sub
-      ? t('plan.free')
-      : t('plan.free');
-  const statusLabel = sub ? t(`plan.status.${sub.status}` as TKey) : null;
-
-  const checkout = async (plan: PlanId) => {
-    setPayError(false);
-    setPaying(true);
-    const res = await startCheckout(plan);
-    setPaying(false);
-    if (res.url) window.location.href = res.url;
-    else setPayError(true);
-  };
 
   const openLatest = useCallback(() => {
     if (!latest || !plan) return;
     onOpenPlan({ id: latest.id, createdAt: latest.createdAt, modelVersion: latest.modelVersion, plan });
   }, [latest, plan, onOpenPlan]);
+
+  const checkout = async (id: PlanId) => {
+    setPayError(false);
+    setPaying(true);
+    const res = await startCheckout(id);
+    setPaying(false);
+    if (res.url) window.location.href = res.url;
+    else setPayError(true);
+  };
 
   const navigate = (action: 'dashboard' | 'plans' | 'new') => {
     if (action === 'dashboard') onHome();
@@ -150,6 +136,13 @@ export const Dashboard = ({
   };
 
   const loading = !data && !error;
+
+  const tabs: { id: Tab; label: string; count?: number }[] = [
+    { id: 'sessions', label: t('dash.tab.sessions'), count: days.length },
+    { id: 'nutrition', label: t('dash.tab.nutrition') },
+    { id: 'recovery', label: t('dash.tab.recovery') },
+    { id: 'plan', label: t('plan.title') },
+  ];
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -171,26 +164,23 @@ export const Dashboard = ({
         }
       >
         {loading && (
-          <div className="space-y-4">
-            <div className="h-9 w-64 animate-pulse rounded-full bg-[#EEF0E9]" />
-            <div className="grid gap-3 sm:grid-cols-3">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="h-[118px] animate-pulse rounded-[14px] bg-[#EEF0E9]" />
+          <div className="space-y-3">
+            <div className="h-8 w-72 animate-pulse rounded-lg bg-white" />
+            <div className="h-11 animate-pulse rounded-[10px] bg-white" />
+            <div className="grid gap-3 sm:grid-cols-5">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-[104px] animate-pulse rounded-[12px] bg-white" />
               ))}
-            </div>
-            <div className="grid gap-3 xl:grid-cols-[1fr_290px]">
-              <div className="h-[320px] animate-pulse rounded-[14px] bg-[#EEF0E9]" />
-              <div className="h-[320px] animate-pulse rounded-[14px] bg-[#EEF0E9]" />
             </div>
           </div>
         )}
 
         {error && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-[#B23B2E]/25 bg-[#FBEDEA] p-4">
-            <p className="text-sm text-[#8E2F24]">{error.raw ? tError(error.raw) : t('plans.error')}</p>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-[#D6455D]/25 bg-[#FDEDF0] p-4">
+            <p className="text-sm text-[#A32D44]">{error.raw ? tError(error.raw) : t('plans.error')}</p>
             <button
               onClick={load}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#B23B2E]/30 px-4 py-2 text-sm font-semibold text-[#8E2F24] hover:bg-white"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#D6455D]/30 px-4 py-2 text-sm font-semibold text-[#A32D44] hover:bg-white"
             >
               <RefreshCw size={14} /> {t('plans.retry')}
             </button>
@@ -200,39 +190,34 @@ export const Dashboard = ({
         {/* ── empty account ───────────────────────────────────── */}
         {data && !plan && (
           <div className="space-y-3">
-            <section
-              className="relative overflow-hidden rounded-[16px] p-6 text-white sm:p-8"
-              style={{ background: C.panel }}
-            >
+            <section className="relative overflow-hidden rounded-[14px] p-6 text-white sm:p-8" style={{ background: C.blue }}>
               <div
                 className="absolute -right-16 -top-16 h-52 w-52 rounded-full blur-3xl"
-                style={{ background: C.lime, opacity: 0.35 }}
+                style={{ background: '#7FA6FF', opacity: 0.55 }}
                 aria-hidden
               />
               <div className="relative max-w-lg">
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: C.lime }}>
-                  {today}
-                </p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/70">{today}</p>
                 <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
                   {t('dash.greetingEmpty1', { name: firstName })} {t('dash.greetingEmpty2')}
                 </h1>
-                <p className="mt-2 text-sm text-white/65">{t('dash.subEmpty')}</p>
+                <p className="mt-2 text-sm text-white/80">{t('dash.subEmpty')}</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button
                     onClick={onNew}
-                    className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-extrabold"
-                    style={{ background: C.lime, color: C.panel }}
+                    className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-extrabold"
+                    style={{ color: C.blue }}
                   >
                     {t('dash.empty.cta')} <ArrowRight size={15} />
                   </button>
                   <button
                     onClick={onOpenPlans}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/25 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/40 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
                   >
                     {t('nav.myPlans')}
                   </button>
                 </div>
-                <p className="mt-3 text-[11px] text-white/40">{t('dash.empty.note')}</p>
+                <p className="mt-3 text-[11px] text-white/60">{t('dash.empty.note')}</p>
               </div>
             </section>
 
@@ -242,16 +227,16 @@ export const Dashboard = ({
                 { icon: <Flame size={16} />, title: t('dash.tile2.title'), body: t('dash.tile2.body') },
                 { icon: <CalendarDays size={16} />, title: t('dash.tile3.title'), body: t('dash.tile3.body') },
               ].map((c) => (
-                <Card key={c.title}>
+                <Panel key={c.title}>
                   <span
                     className="grid h-8 w-8 place-items-center rounded-lg"
-                    style={{ background: 'rgba(168,224,74,0.25)', color: '#3F5A16' }}
+                    style={{ background: C.paleBlue, color: C.blue }}
                   >
                     {c.icon}
                   </span>
                   <p className="mt-2 text-[13px] font-bold">{c.title}</p>
-                  <p className="mt-1 text-[11.5px] leading-relaxed text-[#6E7A6B]">{c.body}</p>
-                </Card>
+                  <p className="mt-1 text-[11.5px] leading-relaxed text-[#8A94A6]">{c.body}</p>
+                </Panel>
               ))}
             </div>
           </div>
@@ -259,44 +244,100 @@ export const Dashboard = ({
 
         {/* ── dashboard ───────────────────────────────────────── */}
         {plan && (
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_290px]">
-            <div className="min-w-0 space-y-3">
-              {/* title row */}
-              <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className={`grid gap-3 ${railOpen ? 'lg:grid-cols-[236px_minmax(0,1fr)]' : 'lg:grid-cols-1'}`}>
+            {/* white session rail */}
+            {railOpen && (
+              <aside className="relative">
+                <div className="rounded-[12px] border border-black/[0.05] bg-white p-3 shadow-[0_14px_34px_-30px_rgba(20,28,60,0.55)]">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[12.5px] font-bold" style={{ color: C.ink }}>
+                      {t('dash.manage')}
+                    </p>
+                    <button
+                      onClick={() => setRailOpen(false)}
+                      aria-label={t('dash.hideRail')}
+                      className="grid h-7 w-7 place-items-center rounded-md text-[#8A94A6] hover:bg-[#F4F5F7] hover:text-[#1A1F36]"
+                    >
+                      <PanelLeftClose size={14} />
+                    </button>
+                  </div>
+
+                  <ul className="mt-3 space-y-2">
+                    {days.map((d, i) => {
+                      const on = i === 0;
+                      return (
+                        <li key={d.day + i}>
+                          <button
+                            onClick={openLatest}
+                            className="w-full rounded-[10px] p-3 text-left transition-colors"
+                            style={
+                              on
+                                ? { background: C.blue, color: '#fff' }
+                                : { background: C.paleBlue, color: C.ink }
+                            }
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <span className="flex items-center gap-2">
+                                <Dumbbell size={14} style={{ color: on ? '#C9D6FF' : C.blue }} />
+                                <span className="text-[11.5px] font-extrabold">{planText(lang, d.day)}</span>
+                              </span>
+                              <span
+                                className="rounded-full px-1.5 py-0.5 text-[9px] font-bold"
+                                style={
+                                  on
+                                    ? { background: 'rgba(255,255,255,0.22)', color: '#fff' }
+                                    : { background: '#fff', color: C.blue }
+                                }
+                              >
+                                {d.total}
+                              </span>
+                            </div>
+                            <p className="mt-1 text-[10px] leading-snug" style={{ color: on ? 'rgba(255,255,255,0.75)' : '#6B7794' }}>
+                              {planText(lang, d.focus)} · ~{d.minutes}′
+                            </p>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+
+                  <button
+                    onClick={openLatest}
+                    className="mt-3 flex w-full items-center justify-between rounded-[10px] px-2 py-2 text-[11px] font-bold"
+                    style={{ color: C.blue, background: '#F5F7FF' }}
+                  >
+                    {t('dash.volumeShort')}
+                    <ChevronRight size={13} />
+                  </button>
+                </div>
+              </aside>
+            )}
+
+            {/* main canvas */}
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h1 className="text-[22px] font-extrabold leading-tight tracking-tight sm:text-[25px]">
+                  <h1 className="text-[20px] font-extrabold leading-tight tracking-tight sm:text-[23px]" style={{ color: C.ink }}>
                     {t('hero.hello', { name: firstName })}
                   </h1>
-                  <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11.5px] text-[#6E7A6B]">
-                    <span>{goalLabel} · {planText(lang, plan.trainingPlan.split)}</span>
-                    <span
-                      className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-extrabold"
-                      style={
-                        activePlan
-                          ? { background: 'rgba(168,224,74,0.28)', color: '#2F4410' }
-                          : { background: '#F1F3EC', color: '#4A5A48' }
-                      }
-                    >
-                      <span
-                        className="h-1.5 w-1.5 rounded-full"
-                        style={{ background: activePlan ? C.panel : '#9AA693' }}
-                      />
-                      {planLabel}
-                    </span>
+                  <p className="mt-0.5 text-[11.5px] text-[#8A94A6]">
+                    {goalLabel} · {planText(lang, plan.trainingPlan.split)} · {t('nav.weekOf', { n: weeksIn })} / 12
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2">
+                  {!railOpen && (
+                    <button
+                      onClick={() => setRailOpen(true)}
+                      aria-label={t('dash.showRail')}
+                      className="grid h-9 w-9 place-items-center rounded-lg border border-black/10 bg-white text-[#6B7794] hover:text-[#1A1F36]"
+                    >
+                      <PanelLeftOpen size={15} />
+                    </button>
+                  )}
                   <button
                     onClick={openLatest}
-                    className="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-1.5 text-[11px] font-semibold text-[#4A5A48] hover:border-black/20"
-                  >
-                    <CalendarDays size={13} /> {t('nav.weekOf', { n: weeksIn })} / 12
-                    <ChevronDown size={13} />
-                  </button>
-                  <button
-                    onClick={openLatest}
-                    className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[11px] font-extrabold uppercase tracking-[0.06em]"
-                    style={{ background: C.panel, color: '#fff' }}
+                    className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[11.5px] font-extrabold text-white"
+                    style={{ background: C.blue }}
                   >
                     {t('dash.openFull')} <ArrowUpRight size={13} />
                   </button>
@@ -305,10 +346,10 @@ export const Dashboard = ({
 
               {!!plan.trainingPlan.substitutions?.length && (
                 <div
-                  className="flex items-start gap-2 rounded-[12px] border px-3 py-2 text-[11px] leading-relaxed"
-                  style={{ borderColor: 'rgba(168,224,74,0.55)', background: 'rgba(168,224,74,0.12)', color: '#3F5A16' }}
+                  className="mt-3 flex items-start gap-2 rounded-[10px] border px-3 py-2 text-[11px] leading-relaxed"
+                  style={{ borderColor: '#C9D6FF', background: '#EEF2FF', color: '#2B3C7A' }}
                 >
-                  <ShieldAlert size={13} className="mt-0.5 shrink-0" />
+                  <Sparkles size={13} className="mt-0.5 shrink-0" />
                   <span>
                     <span className="font-bold">{t('dash.adaptedTitle')}</span> ·{' '}
                     {t(plan.trainingPlan.substitutions.length === 1 ? 'dash.adaptedOne' : 'dash.adaptedMany', {
@@ -318,117 +359,82 @@ export const Dashboard = ({
                 </div>
               )}
 
-              {/* stat tiles */}
-              <div className="grid gap-3 sm:grid-cols-3">
-                <section
-                  className="relative overflow-hidden rounded-[14px] p-4 text-white"
-                  style={{ background: C.panel }}
+              {/* suggestions */}
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-[11px] font-bold text-[#6B7794]">{t('dash.suggestions')}</span>
+                <span
+                  className="rounded-md border px-2 py-0.5 text-[9.5px] font-bold"
+                  style={{ borderColor: '#C9D6FF', color: C.blue }}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-white/70">
-                      <Flame size={13} style={{ color: C.lime }} /> {t('dash.kcalDay')}
-                    </span>
-                    <ArrowUpRight size={14} className="text-white/40" />
-                  </div>
-                  <p className="mt-3 flex items-baseline gap-1">
-                    <span className="text-[27px] font-extrabold leading-none tabular-nums">{plan.nutritionPlan.kcal}</span>
-                    <span className="text-[11px] font-bold text-white/45">{t('share.kcal')}</span>
-                  </p>
-                  <p className="mt-1 text-[12px] font-bold" style={{ color: C.lime }}>
-                    {plan.nutritionPlan.proteinG} g {t('dial.protein').toLowerCase()} ·{' '}
-                    {plan.nutritionPlan.carbsG} g {t('dial.carbs').toLowerCase()}
-                  </p>
-                  <div className="mt-3 flex items-end justify-between">
-                    <span className="text-[10.5px] text-white/40">{today}</span>
-                    <button onClick={openLatest} className="text-[10.5px] font-bold text-white/70 hover:text-white">
-                      {t('perf.all')} ›
-                    </button>
-                  </div>
-                </section>
-
-                <section className="rounded-[14px] border border-black/[0.07] bg-white p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-[#6E7A6B]">{t('dash.sessionsCard')}</span>
-                    <Timer size={14} className="text-[#B7C2B0]" />
-                  </div>
-                  <p className="mt-3 flex items-baseline gap-1 text-[27px] font-extrabold leading-none tabular-nums">
-                    {sessions}
-                    <span className="text-[11px] font-bold text-[#6E7A6B]">/ {t('dash.perWeek')}</span>
-                  </p>
-                  <Trend value={`${weekMinutes} min`} label={t('perf.title').toLowerCase()} tone="up" />
-                </section>
-
-                <section className="rounded-[14px] border border-black/[0.07] bg-white p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-[#6E7A6B]">{t('dash.setsWeek')}</span>
-                    <Dumbbell size={14} className="text-[#B7C2B0]" />
-                  </div>
-                  <p className="mt-3 flex items-baseline gap-1 text-[27px] font-extrabold leading-none tabular-nums">
-                    {weekly}
-                    <span className="text-[11px] font-bold text-[#6E7A6B]">{t('perf.setsShort')}</span>
-                  </p>
-                  <Trend value={`${primarySets} + ${accessorySets}`} label={t('perf.accessory').toLowerCase()} tone="up" />
-                </section>
+                  {t('dash.optimize')}
+                </span>
               </div>
 
-              {/* week list + volume chart */}
-              <div className="grid gap-3 lg:grid-cols-2">
-                <Card>
-                  <CardHead
-                    title={t('week.title')}
-                    sub={t('week.sub', { n: days.length })}
-                    right={
-                      <button
-                        onClick={openLatest}
-                        aria-label={t('perf.all')}
-                        className="grid h-7 w-7 place-items-center rounded-full border border-black/10 text-[#6E7A6B] hover:text-[#1B241C]"
-                      >
-                        <ArrowRight size={13} />
-                      </button>
-                    }
-                  />
-                  <ul className="mt-2">
-                    {days.map((d, i) => (
-                      <li key={d.day + i}>
-                        <button
-                          onClick={openLatest}
-                          className="flex w-full items-center gap-2.5 rounded-lg px-1 py-2 text-left transition-colors hover:bg-[#F4F6EF]"
-                        >
-                          <span
-                            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[10.5px] font-extrabold"
-                            style={
-                              i === 0
-                                ? { background: 'rgba(168,224,74,0.35)', color: '#2F4410' }
-                                : { background: '#F1F3EC', color: '#4A5A48' }
-                            }
-                          >
-                            {i + 1}
-                          </span>
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate text-[12px] font-bold">{planText(lang, d.day)}</span>
-                            <span className="block truncate text-[10px] text-[#6E7A6B]">
-                              {planText(lang, d.focus)} · {t('dash.exercises', { n: d.exercises })}
-                            </span>
-                          </span>
-                          <span className="shrink-0 text-right">
-                            <span className="block text-[11.5px] font-extrabold tabular-nums">{d.total}</span>
-                            <span className="block text-[9.5px] font-semibold text-[#6E7A6B]">
-                              {t('perf.setsShort')} · ~{d.minutes}′
-                            </span>
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
+              <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {[
+                  { id: 'sessions' as Tab, icon: Dumbbell, label: t('dash.tab.sessions'), value: `${sessions}` },
+                  { id: 'nutrition' as Tab, icon: Utensils, label: t('dash.tab.nutrition'), value: `${plan.nutritionPlan.kcal}` },
+                  { id: 'recovery' as Tab, icon: HeartPulse, label: t('dash.tab.recovery'), value: `${plan.recoveryPlan.sleepTarget}h` },
+                  { id: 'plan' as Tab, icon: Layers, label: t('plan.title'), value: activePlan ? t(`plan.${activePlan}` as TKey) : t('plan.free') },
+                ].map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => setTab(s.id)}
+                    className="rounded-[12px] border bg-white px-2 py-3 text-center transition-shadow hover:shadow-[0_12px_26px_-22px_rgba(20,28,60,0.6)]"
+                    style={{ borderColor: tab === s.id ? C.blue : 'rgba(26,31,54,0.06)' }}
+                  >
+                    <s.icon size={19} className="mx-auto" style={{ color: C.blue }} />
+                    <p className="mt-1.5 text-[10.5px] font-bold" style={{ color: C.ink }}>
+                      {s.label}
+                    </p>
+                    <p className="text-[9.5px] text-[#8A94A6]">{s.value}</p>
+                  </button>
+                ))}
+              </div>
 
-                <Card>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h2 className="text-[14px] font-extrabold tracking-tight">{t('perf.title')}</h2>
-                      <p className="mt-0.5 text-[11px] text-[#6E7A6B]">{t('perf.sub', { n: days.length })}</p>
-                    </div>
-                    <div className="flex flex-col gap-1 text-[9.5px] font-semibold text-[#6E7A6B]">
+              {/* tabs */}
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                {tabs.map((item) => {
+                  const on = tab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setTab(item.id)}
+                      className="rounded-full px-3 py-1.5 text-[11px] font-bold transition-colors"
+                      style={
+                        on
+                          ? { background: C.blue, color: '#fff' }
+                          : { background: '#fff', color: '#4A5470' }
+                      }
+                    >
+                      {item.label}
+                      {typeof item.count === 'number' && (
+                        <span
+                          className="ml-1.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold"
+                          style={on ? { background: 'rgba(255,255,255,0.25)' } : { background: '#F1F2F7', color: '#6B7794' }}
+                        >
+                          {item.count}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* tab content */}
+              {tab === 'sessions' && (
+                <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                  <Panel>
+                    <Head
+                      title={t('perf.title')}
+                      sub={t('perf.sub', { n: days.length })}
+                      right={
+                        <span className="rounded-full px-2 py-0.5 text-[9.5px] font-extrabold" style={{ background: C.paleBlue, color: C.blue }}>
+                          {weekly} {t('perf.setsShort')}
+                        </span>
+                      }
+                    />
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[9.5px] font-semibold text-[#8A94A6]">
                       <span className="inline-flex items-center gap-1.5">
                         <span className="h-2 w-2 rounded-[2px]" style={{ background: C.panel }} />
                         {t('perf.primary')}
@@ -438,215 +444,339 @@ export const Dashboard = ({
                         {t('perf.accessory')}
                       </span>
                     </div>
-                  </div>
-                  <div className="mt-2">
-                    <PerformanceBars days={days} />
-                  </div>
-                  <div className="flex items-center justify-between border-t border-dashed border-black/10 pt-2 text-[10.5px] text-[#6E7A6B]">
-                    <span>
-                      {t('week.duration', { n: weekMinutes })}
-                    </span>
-                    <span className="inline-flex items-center gap-1 font-bold text-[#3F5A16]">
-                      <Sparkles size={10} /> {t('dash.today')}
-                    </span>
-                  </div>
-                </Card>
-              </div>
-
-              <Card>
-                <CardHead
-                  title={t('dash.reportTitle')}
-                  sub={t('dash.reportSub', { n: days.length })}
-                  right={
-                    <span className="rounded-full bg-[#F1F3EC] px-2 py-0.5 text-[9.5px] font-extrabold text-[#4A5A48]">
-                      {weekly} {t('perf.setsShort')}
-                    </span>
-                  }
-                />
-                <ul className="mt-3 space-y-2.5">
-                  {days.map((d, i) => (
-                    <li key={`row-${d.day}-${i}`} className="flex items-center gap-3">
-                      <span className="w-[86px] shrink-0 truncate text-[10.5px] font-semibold text-[#4A5A48]">
-                        {planText(lang, d.day)}
+                    <div className="mt-1">
+                      <PerformanceBars days={days} />
+                    </div>
+                    <div className="flex items-center justify-between border-t border-dashed border-black/10 pt-2 text-[10.5px] text-[#8A94A6]">
+                      <span>{t('week.duration', { n: weekMinutes })}</span>
+                      <span className="inline-flex items-center gap-1 font-bold" style={{ color: C.blue }}>
+                        <Sparkles size={10} /> {t('dash.today')}
                       </span>
-                      <span className="relative h-3 flex-1 overflow-hidden rounded-full bg-[#F1F3EC]">
-                        <span
-                          className="absolute inset-y-0 left-0 rounded-full"
-                          style={{
-                            width: `${Math.max(6, Math.round((d.total / Math.max(...days.map((x) => x.total), 1)) * 100))}%`,
-                            background: i === 0 ? C.lime : 'rgba(168,224,74,0.55)',
-                          }}
-                        />
-                      </span>
-                      <span className="w-9 shrink-0 text-right text-[10.5px] font-extrabold tabular-nums">
-                        {d.total}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            </div>
+                    </div>
+                  </Panel>
 
-            {/* right rail */}
-            <aside className="space-y-3">
-              <Card>
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <h2 className="text-[13.5px] font-extrabold">{t('plan.title')}</h2>
-                    {statusLabel && <p className="mt-0.5 text-[10.5px] text-[#6E7A6B]">{statusLabel}</p>}
-                  </div>
-                  <span
-                    className="rounded-full px-2 py-0.5 text-[10px] font-extrabold"
-                    style={
-                      activePlan
-                        ? { background: 'rgba(168,224,74,0.3)', color: '#2F4410' }
-                        : { background: '#F1F3EC', color: '#4A5A48' }
-                    }
-                  >
-                    {planLabel}
-                  </span>
-                </div>
-
-                {activePlan && sub?.currentPeriodEnd ? (
-                  <p className="mt-2 text-[10.5px] text-[#6E7A6B]">
-                    {t('plan.renews', {
-                      date: new Date(sub.currentPeriodEnd).toLocaleDateString(locale, {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      }),
-                    })}
-                  </p>
-                ) : (
-                  <p className="mt-2 text-[10.5px] leading-relaxed text-[#6E7A6B]">{t('plan.none')}</p>
-                )}
-
-                <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.14em] text-[#6E7A6B]">
-                  {t('plan.choose')}
-                </p>
-                <ul className="mt-2 space-y-1.5">
-                  {PLANS.map((option) => {
-                    const selected = choice === option.id;
-                    const current = activePlan === option.id;
-                    return (
-                      <li key={option.id}>
-                        <button
-                          onClick={() => setChoice(option.id)}
-                          aria-pressed={selected}
-                          className="flex w-full items-center gap-2.5 rounded-xl border px-2.5 py-2 text-left transition-colors"
-                          style={{
-                            borderColor: selected ? 'rgba(47,68,16,0.35)' : 'rgba(27,36,28,0.10)',
-                            background: selected ? 'rgba(168,224,74,0.16)' : '#fff',
-                          }}
-                        >
-                          <span
-                            className="grid h-3.5 w-3.5 shrink-0 place-items-center rounded-full border"
-                            style={{ borderColor: selected ? '#2F4410' : 'rgba(27,36,28,0.25)' }}
-                          >
-                            {selected && <span className="h-2 w-2 rounded-full" style={{ background: '#2F4410' }} />}
+                  <Panel>
+                    <Head
+                      title={t('dash.reportTitle')}
+                      sub={t('dash.reportSub', { n: days.length })}
+                      right={<span className="text-[10px] font-bold text-[#8A94A6]">{t('perf.setsShort')}</span>}
+                    />
+                    <ul className="mt-3 space-y-2.5">
+                      {days.map((d, i) => (
+                        <li key={`row-${d.day}-${i}`} className="flex items-center gap-3">
+                          <span className="w-[82px] shrink-0 truncate text-[10.5px] font-semibold text-[#4A5470]">
+                            {planText(lang, d.day)}
                           </span>
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate text-[11.5px] font-extrabold">
-                              {t(option.nameKey)}
-                              {current && (
-                                <span className="ml-1.5 rounded-full bg-[#2F4410] px-1.5 py-[1px] text-[8.5px] font-bold uppercase tracking-wider text-white">
-                                  {t('plan.current')}
+                          <span className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-[#F1F2F7]">
+                            <span
+                              className="absolute inset-y-0 left-0 rounded-full"
+                              style={{
+                                width: `${Math.max(6, Math.round((d.total / Math.max(...days.map((x) => x.total), 1)) * 100))}%`,
+                                background: i === 0 ? C.blue : '#9FB4FF',
+                              }}
+                            />
+                          </span>
+                          <span className="w-8 shrink-0 text-right text-[10.5px] font-extrabold tabular-nums">
+                            {d.total}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-3 grid grid-cols-2 gap-2 border-t border-dashed border-black/10 pt-2.5">
+                      <div>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#8A94A6]">{t('dash.total')}</p>
+                        <p className="text-[12.5px] font-extrabold" style={{ color: C.ink }}>
+                          {weekly} {t('perf.setsShort')}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#8A94A6]">{t('dash.avgPerSession')}</p>
+                        <p className="text-[12.5px] font-extrabold" style={{ color: C.ink }}>
+                          {days.length ? Math.round(weekly / days.length) : 0}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={openLatest}
+                      className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-black/10 py-2 text-[10.5px] font-bold text-[#4A5470] hover:bg-[#F4F5F7]"
+                    >
+                      {t('perf.all')} <ArrowRight size={12} />
+                    </button>
+                  </Panel>
+
+                  <Panel className="lg:col-span-2">
+                    <Head
+                      title={t('dash.nextSession')}
+                      sub={planText(lang, plan.trainingPlan.days[0]?.focus ?? '')}
+                      right={
+                        <button
+                          onClick={openLatest}
+                          className="inline-flex items-center gap-1 text-[10.5px] font-bold"
+                          style={{ color: C.blue }}
+                        >
+                          {t('perf.all')} <ArrowRight size={12} />
+                        </button>
+                      }
+                    />
+                    <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
+                      {(plan.trainingPlan.days[0]?.exercises ?? []).slice(0, 6).map((e) => (
+                        <li
+                          key={e.name}
+                          className="flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-2"
+                          style={{ background: '#F7F8FC' }}
+                        >
+                          <span className="min-w-0 truncate text-[11.5px] font-semibold" style={{ color: C.ink }}>
+                            {planText(lang, e.name)}
+                          </span>
+                          <span className="shrink-0 text-[10px] font-bold tabular-nums text-[#8A94A6]">
+                            {e.sets} × {e.reps}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Panel>
+                </div>
+              )}
+
+              {tab === 'nutrition' && (
+                <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_1fr]">
+                  <Panel>
+                    <Head title={t('share.title')} sub={t('share.sub')} />
+                    <div className="mt-3">
+                      <ShareDonut
+                        proteinG={plan.nutritionPlan.proteinG}
+                        carbsG={plan.nutritionPlan.carbsG}
+                        fatG={plan.nutritionPlan.fatG}
+                        kcal={plan.nutritionPlan.kcal}
+                      />
+                    </div>
+                  </Panel>
+
+                  <Panel>
+                    <Head
+                      title={t('dash.kcalDay')}
+                      sub={`${plan.nutritionPlan.proteinG} g ${t('dial.protein').toLowerCase()} · ${plan.nutritionPlan.carbsG} g ${t('dial.carbs').toLowerCase()}`}
+                      right={<Flame size={15} style={{ color: C.blue }} />}
+                    />
+                    <ul className="mt-3 grid gap-1.5">
+                      {plan.nutritionPlan.meals.slice(0, 4).map((m) => (
+                        <li
+                          key={m.name}
+                          className="flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-2"
+                          style={{ background: '#F7F8FC' }}
+                        >
+                          <span className="min-w-0 truncate text-[11.5px] font-semibold" style={{ color: C.ink }}>
+                            {planText(lang, m.name)}
+                          </span>
+                          <span className="shrink-0 text-[10px] font-bold tabular-nums text-[#8A94A6]">
+                            {m.kcal} kcal · {m.proteinG} g
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Panel>
+                </div>
+              )}
+
+              {tab === 'recovery' && (
+                <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                  <section className="rounded-[12px] p-4" style={{ background: C.paleBlue }}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[12.5px] font-bold" style={{ color: C.ink }}>
+                        {t('side.tipTitle')}
+                      </span>
+                      <HeartPulse size={16} style={{ color: C.blue }} />
+                    </div>
+                    <p className="mt-2 text-[11.5px] leading-relaxed" style={{ color: '#2B3C7A' }}>
+                      {planText(lang, plan.recoveryPlan.cardio)}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[9.5px] font-bold" style={{ color: '#2B3C7A' }}>
+                        <MoonStar size={10} /> {t('dash.sleep', { n: plan.recoveryPlan.sleepTarget })}
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[9.5px] font-bold" style={{ color: '#2B3C7A' }}>
+                        <Timer size={10} /> {t('dash.deload', { n: plan.recoveryPlan.deloadEveryWeeks })}
+                      </span>
+                    </div>
+                  </section>
+
+                  <Panel>
+                    <Head title={t('week.title')} sub={t('week.sub', { n: days.length })} />
+                    <ul className="mt-2">
+                      {days.map((d, i) => (
+                        <li key={`rec-${d.day}-${i}`} className="flex items-center gap-2.5 border-b border-dashed border-black/5 py-2 last:border-0">
+                          <span
+                            className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-[10px] font-extrabold"
+                            style={{ background: i === 0 ? C.blue : '#F1F2F7', color: i === 0 ? '#fff' : '#4A5470' }}
+                          >
+                            {i + 1}
+                          </span>
+                          <span className="min-w-0 flex-1 truncate text-[11.5px] font-bold" style={{ color: C.ink }}>
+                            {planText(lang, d.day)}
+                          </span>
+                          <span className="text-[10px] font-semibold text-[#8A94A6]">~{d.minutes}′</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Panel>
+                </div>
+              )}
+
+              {tab === 'plan' && (
+                <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_1fr]">
+                  <Panel>
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h2 className="text-[13.5px] font-bold" style={{ color: C.ink }}>
+                          {t('plan.title')}
+                        </h2>
+                        <p className="mt-0.5 text-[10.5px] text-[#8A94A6]">
+                          {sub ? t(`plan.status.${sub.status}` as TKey) : t('plan.none')}
+                        </p>
+                      </div>
+                      <span
+                        className="rounded-full px-2 py-0.5 text-[10px] font-extrabold"
+                        style={
+                          activePlan
+                            ? { background: C.paleBlue, color: C.blue }
+                            : { background: '#F1F2F7', color: '#6B7794' }
+                        }
+                      >
+                        {activePlan ? t(`plan.${activePlan}` as TKey) : t('plan.free')}
+                      </span>
+                    </div>
+
+                    <ul className="mt-3 space-y-1.5">
+                      {PLANS.map((option) => {
+                        const selected = choice === option.id;
+                        const current = activePlan === option.id;
+                        return (
+                          <li key={option.id}>
+                            <button
+                              onClick={() => setChoice(option.id)}
+                              aria-pressed={selected}
+                              className="flex w-full items-center gap-2.5 rounded-[10px] border px-2.5 py-2 text-left transition-colors"
+                              style={{
+                                borderColor: selected ? C.blue : 'rgba(26,31,54,0.10)',
+                                background: selected ? '#EEF2FF' : '#fff',
+                              }}
+                            >
+                              <span
+                                className="grid h-3.5 w-3.5 shrink-0 place-items-center rounded-full border"
+                                style={{ borderColor: selected ? C.blue : 'rgba(26,31,54,0.25)' }}
+                              >
+                                {selected && <span className="h-2 w-2 rounded-full" style={{ background: C.blue }} />}
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-[11.5px] font-extrabold" style={{ color: C.ink }}>
+                                  {t(option.nameKey)}
+                                  {current && (
+                                    <span className="ml-1.5 rounded-full px-1.5 py-[1px] text-[8.5px] font-bold uppercase tracking-wider text-white" style={{ background: C.blue }}>
+                                      {t('plan.current')}
+                                    </span>
+                                  )}
                                 </span>
-                              )}
+                                <span className="block text-[10px] text-[#8A94A6]">
+                                  {money(option.amount, lang)} {t('landing.pricing.currency')}
+                                </span>
+                              </span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+
+                    <button
+                      onClick={() => checkout(choice)}
+                      disabled={paying}
+                      className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full py-2 text-[11px] font-extrabold text-white disabled:opacity-60"
+                      style={{ background: C.blue }}
+                    >
+                      {paying
+                        ? '…'
+                        : t('landing.pricing.pay', {
+                            price: `${money(planAmount(choice), lang)} ${t('landing.pricing.currency')}`,
+                          })}
+                      <ArrowRight size={12} />
+                    </button>
+                    {payError && (
+                      <p className="mt-2 text-[10.5px] font-semibold" style={{ color: C.red }} role="alert">
+                        {t('plan.payError')}
+                      </p>
+                    )}
+                  </Panel>
+
+                  <Panel>
+                    <Head
+                      title={t('dash.history')}
+                      right={
+                        (data?.totals.plans ?? 0) > 1 ? (
+                          <button onClick={onOpenPlans} className="text-[10.5px] font-bold" style={{ color: C.blue }}>
+                            {t('dash.viewAll', { n: data?.totals.plans ?? 1 })}
+                          </button>
+                        ) : undefined
+                      }
+                    />
+                    <ul className="mt-2 space-y-1.5">
+                      <li>
+                        <button
+                          onClick={openLatest}
+                          className="flex w-full items-center gap-2 rounded-[10px] px-2.5 py-2 text-left"
+                          style={{ background: '#F7F8FC' }}
+                        >
+                          <CalendarDays size={13} style={{ color: C.blue }} />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[11.5px] font-bold" style={{ color: C.ink }}>
+                              {t('history.row', { id: latest!.id, goal: goalLabel })}
                             </span>
-                            <span className="block text-[10px] text-[#6E7A6B]">
-                              {money(option.amount, lang)} {t('landing.pricing.currency')}
+                            <span className="block text-[9.5px] text-[#8A94A6]">
+                              {t('dash.updated', {
+                                date: new Date(latest!.createdAt).toLocaleDateString(locale, { day: 'numeric', month: 'short' }),
+                              })}
                             </span>
+                          </span>
+                          <span className="rounded-full px-2 py-0.5 text-[8.5px] font-extrabold uppercase" style={{ background: C.paleBlue, color: C.blue }}>
+                            {t('dash.active')}
                           </span>
                         </button>
                       </li>
-                    );
-                  })}
-                </ul>
+                      {(data?.recent ?? []).map((b) => (
+                        <li key={b.id}>
+                          <button
+                            onClick={() => onOpenPlanId(b.id)}
+                            className="flex w-full items-center gap-2 rounded-[10px] px-2.5 py-2 text-left hover:bg-[#F7F8FC]"
+                          >
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: '#C9D6FF' }} />
+                            <span className="min-w-0 flex-1 truncate text-[11.5px] font-semibold" style={{ color: C.ink }}>
+                              {t('history.row', { id: b.id, goal: t(b.goal ? (`goal.${b.goal}` as TKey) : 'goal.none') })}
+                            </span>
+                            <ArrowRight size={12} className="shrink-0 text-[#C9D6FF]" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
 
-                <button
-                  onClick={() => checkout(choice)}
-                  disabled={paying}
-                  className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full py-2 text-[11px] font-extrabold text-white transition-opacity disabled:opacity-60"
-                  style={{ background: C.panel }}
-                >
-                  {paying
-                    ? '…'
-                    : t('landing.pricing.pay', {
-                        price: `${money(planAmount(choice), lang)} ${t('landing.pricing.currency')}`,
-                      })}
-                  <ArrowRight size={12} />
-                </button>
-                {payError && (
-                  <p className="mt-2 text-[10.5px] font-semibold text-[#9E3A28]" role="alert">
-                    {t('plan.payError')}
-                  </p>
-                )}
-              </Card>
-
-              <Card>
-                <div className="text-center">
-                  <h2 className="text-[13.5px] font-extrabold">{t('share.title')}</h2>
-                  <p className="mt-0.5 text-[10.5px] text-[#6E7A6B]">{t('share.sub')}</p>
+                    <div className="mt-3 grid grid-cols-2 gap-2 border-t border-dashed border-black/10 pt-2.5">
+                      <div>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#8A94A6]">{t('dash.plansMade')}</p>
+                        <p className="text-[12.5px] font-extrabold" style={{ color: C.ink }}>{data?.totals.plans ?? 0}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#8A94A6]">{t('dash.checkins')}</p>
+                        <p className="text-[12.5px] font-extrabold" style={{ color: C.ink }}>{data?.totals.checkins ?? 0}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={onNew}
+                      className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full py-2 text-[11px] font-extrabold text-white"
+                      style={{ background: C.panel }}
+                    >
+                      <Plus size={13} /> {t('nav.newPlan')}
+                    </button>
+                  </Panel>
                 </div>
-                <div className="mt-3">
-                  <ShareDonut
-                    proteinG={plan.nutritionPlan.proteinG}
-                    carbsG={plan.nutritionPlan.carbsG}
-                    fatG={plan.nutritionPlan.fatG}
-                    kcal={plan.nutritionPlan.kcal}
-                  />
-                </div>
-                <button
-                  onClick={openLatest}
-                  className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-black/10 py-2 text-[11px] font-bold text-[#2F4410] hover:bg-[#F4F6EF]"
-                >
-                  {t('blocks.seeAll')} <ArrowRight size={12} />
-                </button>
-              </Card>
-
-              <section
-                className="relative overflow-hidden rounded-[14px] p-4"
-                style={{ background: C.sage }}
-              >
-                <div className="flex items-start justify-between">
-                  <span
-                    className="grid h-8 w-8 place-items-center rounded-lg text-white"
-                    style={{ background: C.panel }}
-                  >
-                    <Sparkles size={15} />
-                  </span>
-                  <span
-                    className="text-[34px] leading-none"
-                    style={{ color: C.lime }}
-                    aria-hidden
-                  >
-                    ✳
-                  </span>
-                </div>
-                <p className="mt-3 text-[15px] font-extrabold leading-snug" style={{ color: C.panel }}>
-                  {t('side.tipTitle')}
-                </p>
-                <p className="mt-1 line-clamp-3 text-[11px] leading-relaxed text-[#4A5A48]">
-                  {planText(lang, plan.recoveryPlan.cardio)}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-1 text-[9.5px] font-bold text-[#2F4410]">
-                    <MoonStar size={10} /> {t('dash.sleep', { n: plan.recoveryPlan.sleepTarget })}
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-1 text-[9.5px] font-bold text-[#2F4410]">
-                    <Timer size={10} /> {t('dash.deload', { n: plan.recoveryPlan.deloadEveryWeeks })}
-                  </span>
-                </div>
-                <button
-                  onClick={onNew}
-                  className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full py-2 text-[11px] font-extrabold text-white"
-                  style={{ background: C.panel }}
-                >
-                  {t('nav.newPlan')} <ArrowRight size={12} />
-                </button>
-              </section>
-            </aside>
+              )}
+            </div>
           </div>
         )}
       </Shell>

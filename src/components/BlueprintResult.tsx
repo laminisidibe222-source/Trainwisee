@@ -18,7 +18,7 @@ const Cell = ({
   sub?: string;
 }) => (
   <div className="glass-card rounded-2xl border border-slate-200 p-5">
-    <div className="flex items-center gap-2 text-lime-700 text-xs font-semibold uppercase tracking-wider">
+    <div className="flex items-center gap-2 text-[#2952FF] text-xs font-semibold uppercase tracking-wider">
       {icon} {label}
     </div>
     <p className="mt-3 text-3xl font-bold text-slate-900 tracking-tight tabular-nums">{value}</p>
@@ -77,7 +77,7 @@ export const BlueprintResult = ({
               <Database size={14} /> {t('result.saved')}
             </p>
             <h1 className="mt-3 text-4xl sm:text-5xl font-bold tracking-tight">
-              {t('result.title1')} <span className="text-lime-700">{t('result.title2')}</span>
+              {t('result.title1')} <span className="text-[#2952FF]">{t('result.title2')}</span>
             </h1>
             <p className="mt-3 text-slate-600 max-w-xl">
               {t('result.meta', { split: planText(lang, tp.split), n: tp.frequency, version: plan.modelVersion })}
@@ -124,7 +124,7 @@ export const BlueprintResult = ({
               <div key={d.day} className="glass-card rounded-2xl border border-slate-200 p-5">
                 <div className="flex items-baseline justify-between">
                   <p className="font-bold text-slate-900">{planText(lang, d.day)}</p>
-                  <span className="text-[10px] uppercase tracking-wider text-lime-700">{planText(lang, d.focus)}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-[#2952FF]">{planText(lang, d.focus)}</span>
                 </div>
                 <ul className="mt-4 space-y-2">
                   {d.exercises.map((e) => (
@@ -181,7 +181,7 @@ export const BlueprintResult = ({
             <ul className="space-y-3">
               {roadmap.map((w) => (
                 <li key={w.weeks} className="text-sm">
-                  <span className="font-mono text-xs text-lime-700 mr-2">W{w.weeks}</span>
+                  <span className="font-mono text-xs text-[#2952FF] mr-2">W{w.weeks}</span>
                   <span className="text-slate-900 font-semibold">{planText(lang, w.focus)}</span>
                   <span className="text-slate-600"> — {planText(lang, w.milestone)}</span>
                 </li>
