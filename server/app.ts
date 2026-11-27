@@ -24,7 +24,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { db, sql as neon } from '../src/db/index.js';
-import { users, profiles, blueprints, sessions, checkins } from '../src/db/schema.js';
+import { users, profiles, blueprints, sessions, checkins, subscriptions } from '../src/db/schema.js';
 import { generateBlueprint } from './plan.js';
 import { applyWebhook, createCheckout, isPlanId } from './pay.js';
 import { onboardingSchema } from '../src/types/onboarding.js';
@@ -298,7 +298,7 @@ app.get('/api/dashboard', async (req, res) => {
   if (!user) return;
 
   try {
-    const [recent, planTotals, checkinTotals, lastCheckin] = await Promise.all([
+    const [recent, planTotals, checkinTotals, lastCheckin, subRows] = await Promise.all([
       db
         .select()
         .from(blueprints)
@@ -313,6 +313,16 @@ app.get('/api/dashboard', async (req, res) => {
         .where(eq(checkins.userId, user.id))
         .orderBy(desc(checkins.date))
         .limit(1),
+      db
+        .select({
+          plan: subscriptions.plan,
+          status: subscriptions.status,
+          currentPeriodEnd: subscriptions.currentPeriodEnd,
+        })
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, user.id))
+        .orderBy(desc(subscriptions.id))
+        .limit(1),
     ]);
 
     const [latestRow] = recent;
@@ -322,6 +332,7 @@ app.get('/api/dashboard', async (req, res) => {
       user: publicUser(user),
       totals: { plans: planTotals[0]?.n ?? 0, checkins: checkinTotals[0]?.n ?? 0 },
       checkin: lastCheckin[0] ?? null,
+      subscription: subRows[0] ?? null,
       // The newest plan ships in full so "open my plan" does not need a second
       // request; the rest are summaries because the list is only navigation.
       latest: latestRow
@@ -400,6 +411,32 @@ app.post('/api/pay/webhook', async (req, res) => {
     timestamp: req.header('x-webhook-timestamp') ?? undefined,
   });
   return res.status(result.status).json(result.body);
+});
+
+/* ---------------- subscription ---------------- */
+
+/** The signed-in account's current forfait, or null on the free tier. */
+app.get('/api/subscription', async (req, res) => {
+  const user = requireUser(req, res);
+  if (!user) return;
+
+  try {
+    const [row] = await db
+      .select({
+        plan: subscriptions.plan,
+        status: subscriptions.status,
+        currentPeriodEnd: subscriptions.currentPeriodEnd,
+      })
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, user.id))
+      .orderBy(desc(subscriptions.id))
+      .limit(1);
+
+    return res.json({ ok: true, subscription: row ?? null });
+  } catch (err) {
+    console.error('[subscription] read failed:', err);
+    return res.status(503).json({ error: 'Could not read the subscription.' });
+  }
 });
 
 /* ---------------- public routes ---------------- */

@@ -14,7 +14,7 @@ import {
   Sparkles,
   Timer,
 } from 'lucide-react';
-import { getDashboard, type DashboardData, type SavedBlueprint, type User } from '../lib/api';
+import { getDashboard, startCheckout, type DashboardData, type SavedBlueprint, type User } from '../lib/api';
 import { planText, useI18n, type TKey } from '../i18n';
 import { Shell } from './dash/Shell';
 import { PlanSearch } from './dash/PlanSearch';
@@ -81,6 +81,8 @@ export const Dashboard = ({
 }) => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<{ raw: string | null } | null>(null);
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState(false);
   const { t, tError, lang } = useI18n();
 
   const load = useCallback(() => {
@@ -111,6 +113,24 @@ export const Dashboard = ({
   const weekMinutes = days.reduce((a, d) => a + d.minutes, 0);
   const primarySets = days.reduce((a, d) => a + d.primary, 0);
   const accessorySets = days.reduce((a, d) => a + d.accessory, 0);
+
+  const sub = data?.subscription ?? null;
+  const activePlan = sub?.status === 'active' ? sub.plan : null;
+  const planLabel = activePlan
+    ? t(`plan.${activePlan}` as TKey)
+    : sub
+      ? t('plan.free')
+      : t('plan.free');
+  const statusLabel = sub ? t(`plan.status.${sub.status}` as TKey) : t('plan.none');
+
+  const checkout = async (plan: 'starter' | 'pro' | 'coached') => {
+    setPayError(false);
+    setPaying(true);
+    const res = await startCheckout(plan);
+    setPaying(false);
+    if (res.url) window.location.href = res.url;
+    else setPayError(true);
+  };
 
   const openLatest = useCallback(() => {
     if (!latest || !plan) return;
@@ -241,8 +261,22 @@ export const Dashboard = ({
                   <h1 className="text-[22px] font-extrabold leading-tight tracking-tight sm:text-[25px]">
                     {t('hero.hello', { name: firstName })}
                   </h1>
-                  <p className="mt-0.5 text-[11.5px] text-[#6E7A6B]">
-                    {goalLabel} · {planText(lang, plan.trainingPlan.split)}
+                  <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11.5px] text-[#6E7A6B]">
+                    <span>{goalLabel} · {planText(lang, plan.trainingPlan.split)}</span>
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-extrabold"
+                      style={
+                        activePlan
+                          ? { background: 'rgba(168,224,74,0.28)', color: '#2F4410' }
+                          : { background: '#F1F3EC', color: '#4A5A48' }
+                      }
+                    >
+                      <span
+                        className="h-1.5 w-1.5 rounded-full"
+                        style={{ background: activePlan ? C.panel : '#9AA693' }}
+                      />
+                      {planLabel}
+                    </span>
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -449,6 +483,54 @@ export const Dashboard = ({
 
             {/* right rail */}
             <aside className="space-y-3">
+              <Card>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h2 className="text-[13.5px] font-extrabold">{t('plan.title')}</h2>
+                    <p className="mt-0.5 text-[10.5px] text-[#6E7A6B]">{statusLabel}</p>
+                  </div>
+                  <span
+                    className="rounded-full px-2 py-0.5 text-[10px] font-extrabold"
+                    style={
+                      activePlan
+                        ? { background: 'rgba(168,224,74,0.3)', color: '#2F4410' }
+                        : { background: '#F1F3EC', color: '#4A5A48' }
+                    }
+                  >
+                    {planLabel}
+                  </span>
+                </div>
+
+                {activePlan && sub?.currentPeriodEnd ? (
+                  <p className="mt-3 text-[11px] text-[#6E7A6B]">
+                    {t('plan.renews', {
+                      date: new Date(sub.currentPeriodEnd).toLocaleDateString(locale, {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      }),
+                    })}
+                  </p>
+                ) : (
+                  <p className="mt-3 text-[11px] leading-relaxed text-[#6E7A6B]">{t('plan.none')}</p>
+                )}
+
+                <button
+                  onClick={() => checkout(activePlan ? (activePlan as 'starter' | 'pro' | 'coached') : 'pro')}
+                  disabled={paying}
+                  className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full py-2 text-[11px] font-extrabold text-white transition-opacity disabled:opacity-60"
+                  style={{ background: C.panel }}
+                >
+                  {paying ? '…' : activePlan ? t('plan.renew') : t('plan.upgrade')}
+                  <ArrowRight size={12} />
+                </button>
+                {payError && (
+                  <p className="mt-2 text-[10.5px] font-semibold text-[#9E3A28]" role="alert">
+                    {t('plan.payError')}
+                  </p>
+                )}
+              </Card>
+
               <Card>
                 <div className="text-center">
                   <h2 className="text-[13.5px] font-extrabold">{t('share.title')}</h2>

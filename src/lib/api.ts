@@ -131,10 +131,17 @@ export { ApiError };
 
 export type DashboardCheckin = { date: string; weightKg: number | null; energy: number | null };
 
+export type Subscription = {
+  plan: string;
+  status: string;
+  currentPeriodEnd: string | null;
+};
+
 export type DashboardData = {
   ok: true;
   user: User;
   totals: { plans: number; checkins: number };
+  subscription: Subscription | null;
   checkin: DashboardCheckin | null;
   latest: {
     id: number;
