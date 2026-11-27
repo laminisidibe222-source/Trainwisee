@@ -7,6 +7,7 @@ const HeroScene = React.lazy(() =>
 import { Logo, Avatar } from '../components/Logo';
 import { ArrowRight, Activity, Zap, ShieldCheck, Download, Sparkles, Check, Menu, X, LogIn, LogOut } from 'lucide-react';
 import { startCheckout, type User } from '../lib/api';
+import { PLANS, money, type PlanId } from '../lib/plans';
 import { LanguageToggle, useI18n, type TKey } from '../i18n';
 
 export const LandingPage = ({
@@ -54,16 +55,12 @@ export const LandingPage = ({
     { step: '03', title: 'landing.how.s3.title', desc: 'landing.how.s3.desc' },
   ];
 
-  // Prices in XOF so the displayed amount is exactly what SasPay charges.
-  const tiers: { id: 'starter' | 'pro' | 'coached'; amount: number; name: TKey; desc: TKey; popular: boolean }[] = [
-    { id: 'starter', amount: 9900, name: 'landing.pricing.p1.name', desc: 'landing.pricing.p1.desc', popular: false },
-    { id: 'pro', amount: 19900, name: 'landing.pricing.p2.name', desc: 'landing.pricing.p2.desc', popular: true },
-    { id: 'coached', amount: 49900, name: 'landing.pricing.p3.name', desc: 'landing.pricing.p3.desc', popular: false },
-  ];
+  // Prices come from one shared list so in-app upgrades and this page agree.
+  const tiers = PLANS.map((p) => ({ ...p, name: p.nameKey, desc: p.descKey }));
 
-  const money = (n: number) => n.toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-GB');
+  const fmt = (n: number) => money(n, lang);
 
-  const buy = async (id: 'starter' | 'pro' | 'coached') => {
+  const buy = async (id: PlanId) => {
     setPayError(false);
     if (!user) {
       onGetBlueprint();
@@ -357,7 +354,7 @@ export const LandingPage = ({
                 <p className="text-slate-600 text-xs mt-1">{t(tier.desc)}</p>
               </div>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-5xl font-extrabold text-slate-900">{money(tier.amount)}</span>
+                <span className="text-5xl font-extrabold text-slate-900">{fmt(tier.amount)}</span>
                 <span className="text-slate-600 text-sm font-semibold">{t('landing.pricing.currency')}</span>
                 <span className="text-slate-500 text-xs">{t('landing.pricing.period')}</span>
               </div>
@@ -369,7 +366,7 @@ export const LandingPage = ({
                 {paying === tier.id
                   ? t('landing.pricing.redirecting')
                   : user
-                    ? t('landing.pricing.pay', { price: `${money(tier.amount)} ${t('landing.pricing.currency')}` })
+                    ? t('landing.pricing.pay', { price: `${fmt(tier.amount)} ${t('landing.pricing.currency')}` })
                     : t('landing.pricing.cta')}
               </button>
             </div>

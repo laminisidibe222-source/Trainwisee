@@ -22,6 +22,7 @@ import { PerformanceBars } from './dash/PerformanceBars';
 import { ShareDonut } from './dash/ShareDonut';
 import { dayVolumes, weeklySets } from './dash/planView';
 import { C } from './dash/theme';
+import { PLANS, isPlanId, money, planAmount, type PlanId } from '../lib/plans';
 import type { Plan } from '../types/blueprint';
 
 /**
@@ -83,6 +84,7 @@ export const Dashboard = ({
   const [error, setError] = useState<{ raw: string | null } | null>(null);
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState(false);
+  const [choice, setChoice] = useState<PlanId>('pro');
   const { t, tError, lang } = useI18n();
 
   const load = useCallback(() => {
@@ -115,15 +117,19 @@ export const Dashboard = ({
   const accessorySets = days.reduce((a, d) => a + d.accessory, 0);
 
   const sub = data?.subscription ?? null;
-  const activePlan = sub?.status === 'active' ? sub.plan : null;
+  const activePlan = sub?.status === 'active' && isPlanId(sub.plan) ? sub.plan : null;
+
+  useEffect(() => {
+    if (activePlan) setChoice(activePlan);
+  }, [activePlan]);
   const planLabel = activePlan
     ? t(`plan.${activePlan}` as TKey)
     : sub
       ? t('plan.free')
       : t('plan.free');
-  const statusLabel = sub ? t(`plan.status.${sub.status}` as TKey) : t('plan.none');
+  const statusLabel = sub ? t(`plan.status.${sub.status}` as TKey) : null;
 
-  const checkout = async (plan: 'starter' | 'pro' | 'coached') => {
+  const checkout = async (plan: PlanId) => {
     setPayError(false);
     setPaying(true);
     const res = await startCheckout(plan);
@@ -487,7 +493,7 @@ export const Dashboard = ({
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h2 className="text-[13.5px] font-extrabold">{t('plan.title')}</h2>
-                    <p className="mt-0.5 text-[10.5px] text-[#6E7A6B]">{statusLabel}</p>
+                    {statusLabel && <p className="mt-0.5 text-[10.5px] text-[#6E7A6B]">{statusLabel}</p>}
                   </div>
                   <span
                     className="rounded-full px-2 py-0.5 text-[10px] font-extrabold"
@@ -502,7 +508,7 @@ export const Dashboard = ({
                 </div>
 
                 {activePlan && sub?.currentPeriodEnd ? (
-                  <p className="mt-3 text-[11px] text-[#6E7A6B]">
+                  <p className="mt-2 text-[10.5px] text-[#6E7A6B]">
                     {t('plan.renews', {
                       date: new Date(sub.currentPeriodEnd).toLocaleDateString(locale, {
                         day: 'numeric',
@@ -512,16 +518,63 @@ export const Dashboard = ({
                     })}
                   </p>
                 ) : (
-                  <p className="mt-3 text-[11px] leading-relaxed text-[#6E7A6B]">{t('plan.none')}</p>
+                  <p className="mt-2 text-[10.5px] leading-relaxed text-[#6E7A6B]">{t('plan.none')}</p>
                 )}
 
+                <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.14em] text-[#6E7A6B]">
+                  {t('plan.choose')}
+                </p>
+                <ul className="mt-2 space-y-1.5">
+                  {PLANS.map((option) => {
+                    const selected = choice === option.id;
+                    const current = activePlan === option.id;
+                    return (
+                      <li key={option.id}>
+                        <button
+                          onClick={() => setChoice(option.id)}
+                          aria-pressed={selected}
+                          className="flex w-full items-center gap-2.5 rounded-xl border px-2.5 py-2 text-left transition-colors"
+                          style={{
+                            borderColor: selected ? 'rgba(47,68,16,0.35)' : 'rgba(27,36,28,0.10)',
+                            background: selected ? 'rgba(168,224,74,0.16)' : '#fff',
+                          }}
+                        >
+                          <span
+                            className="grid h-3.5 w-3.5 shrink-0 place-items-center rounded-full border"
+                            style={{ borderColor: selected ? '#2F4410' : 'rgba(27,36,28,0.25)' }}
+                          >
+                            {selected && <span className="h-2 w-2 rounded-full" style={{ background: '#2F4410' }} />}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[11.5px] font-extrabold">
+                              {t(option.nameKey)}
+                              {current && (
+                                <span className="ml-1.5 rounded-full bg-[#2F4410] px-1.5 py-[1px] text-[8.5px] font-bold uppercase tracking-wider text-white">
+                                  {t('plan.current')}
+                                </span>
+                              )}
+                            </span>
+                            <span className="block text-[10px] text-[#6E7A6B]">
+                              {money(option.amount, lang)} {t('landing.pricing.currency')}
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+
                 <button
-                  onClick={() => checkout(activePlan ? (activePlan as 'starter' | 'pro' | 'coached') : 'pro')}
+                  onClick={() => checkout(choice)}
                   disabled={paying}
                   className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full py-2 text-[11px] font-extrabold text-white transition-opacity disabled:opacity-60"
                   style={{ background: C.panel }}
                 >
-                  {paying ? '…' : activePlan ? t('plan.renew') : t('plan.upgrade')}
+                  {paying
+                    ? '…'
+                    : t('landing.pricing.pay', {
+                        price: `${money(planAmount(choice), lang)} ${t('landing.pricing.currency')}`,
+                      })}
                   <ArrowRight size={12} />
                 </button>
                 {payError && (
